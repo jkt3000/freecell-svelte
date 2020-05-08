@@ -1,0 +1,14 @@
+html, body { height: 100%; }
+
+body {
+  background: radial-gradient(ellipse, rgba(0,128,0,1) 10%, rgba(0,48,0,1) 100%) no-repeat;
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #ddd;
+  overflow:hidden;
+}
+
+.bg-dark {
+  background: rgba(0,0,0,0.3) !important;
+}

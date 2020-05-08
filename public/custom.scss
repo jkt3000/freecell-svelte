@@ -1,0 +1,102 @@
+@import "~bootstrap/scss/bootstrap";
+
+html, body { height: 100%; }
+
+body {
+  background: radial-gradient(ellipse, rgba(0,128,0,1) 10%, rgba(0,48,0,1) 100%) no-repeat;
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #ddd;
+  overflow:hidden;
+}
+
+.bg-dark {
+  background: rgba(0,0,0,0.3) !important;
+}
+
+/* card is 400px x 560px */
+
+.playing-card {
+  margin:0; padding:0;
+  width: 11.5vw;
+  height: 16.1vw;  // 11.5 * 1.4
+  border-radius: 0.5vw;
+  box-shadow: 0px 0px 4px 1px rgba(0,0,0,0.5);
+  &.faded {
+    opacity: 0.1;    
+  }
+  &.active {
+    box-shadow: 0px 0px 2vw 1vw rgba(255,255,0,0.5);
+  }
+}
+
+.freecell-frame, .foundation-frame {
+  margin:0;
+  padding: 0 0.5vw;
+  width: 50%;
+  height: 20vw;
+  display: flex;
+  align-items: center;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  .cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 11.5vw;
+    height: 16.1vw;
+    background: rbga(255,0,0);
+    border: 1px solid #161; 
+    margin: 1px;
+    span {
+      font-weight: bold;
+      font-size: 5vh; 
+      color: rgba(0,0,0,0.2);      
+    }
+  }
+  .cell.active {
+    border: 1px solid #FFF; 
+    background: rbga(255,255,255,0.5);
+    box-shadow: 0px 0px 2vw 1vw rgba(255,255,0,0.5);
+  }
+}
+.freecell-frame {
+  justify-content: flex-end;
+}
+.foundation-frame {
+  justify-content: flex-start;
+}
+
+
+.tableau-frame {
+  height: 80vh;
+  padding: 3vh 0;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+}
+.tableau {
+  background: rgba(0,0,0,0.2);
+  padding: 0; margin:0;
+  width: 12vw;
+  height: 70vh;
+  margin: 0 1px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  .playing-card:first-child {
+    margin-top: 0;
+  }
+  .playing-card {
+    margin-top: -8vw;
+  }
+}
+
+
+/* draggable stuff */
+
+.draggable {
+  touch-action: none;
+  user-select: none;
+}
