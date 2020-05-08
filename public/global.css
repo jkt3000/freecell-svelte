@@ -10,5 +10,8 @@ body {
 }
 
 .bg-dark {
-  background: rgba(0,0,0,0.3) !important;
+  background: rgba(0,48,0,1) !important;
 }
+
+
+nav i { font-size: 1.5em; }

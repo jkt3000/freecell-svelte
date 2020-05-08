@@ -1,60 +1,69 @@
 <script>
-	export let name;
+	import FooterBar from './footer.svelte';
 </script>
 
+
+<nav class="navbar navbar-dark bg-dark m-0 p-0 pl-1 pr-1 d-flex justify-content-between align-content-center">
+  <a class="navbar-brand" href="/"><span class='text-danger' style='font-size: 30px; line-height:1em; margin:0;padding:0;'>♥️</span></a>
+  <span class='navbar-brand'>03:45</span>
+  <span class='navbar-brand'>Moves: 21</span>
+</nav>
+        
 <main>
 	<div class='container-fluid'>
-      <div class='row'>
-        <div class='col-6 foundation-frame' id='home-cells'>
-            <div class='cell dropzone'><span>A</span></div>
-            <div class='cell dropzone'><span>A</span></div>
-            <div class='cell dropzone'><span>A</span></div>
-            <div class='cell dropzone'><span>A</span></div>
-        </div>
-        <div class='col-6 freecell-frame' id='free-cells'>
-            <div class='cell dropzone'></div>
-            <div class='cell dropzone'></div>
-            <div class='cell dropzone'></div>
-            <div class='cell dropzone'></div>
-        </div>
+    <div class='row'>
+      <div class='col-6 foundation-frame' id='home-cells'>
+          <div class='cell dropzone'><span>A</span></div>
+          <div class='cell dropzone'><span>A</span></div>
+          <div class='cell dropzone'><span>A</span></div>
+          <div class='cell dropzone'><span>A</span></div>
       </div>
-      <div class='row'>
-        <div class='col-12 tableau-frame'>
-          <div class='tableau' id='tableau-1'>
-            <img src='/images/jc.png' class='playing-card'>            
-            <img src='/images/jd.png' class='playing-card'>            
-            <img src='/images/qh.png' class='playing-card'>            
-            <img src='/images/7c.png' class='playing-card'>            
-            <img src='/images/8d.png' class='playing-card'>            
-            <img src='/images/9s.png' class='playing-card'>            
-            <img src='/images/th.png' class='playing-card'>            
-            <img src='/images/jc.png' class='playing-card active'>            
-          </div>
-          <div class='tableau' id='tableau-2'>
-            <img src='/images/ah.png' class='playing-card'>
-          </div>
-          <div class='tableau' id='tableau-3'>
-            <img src='/images/4s.png' class='playing-card'>
-          </div>
-          <div class='tableau' id='tableau-4'>
-            <img src='/images/7h.png' class='playing-card'>
-          </div>
-          <div class='tableau' id='tableau-5'>
-            <img src='/images/qc.png' class='playing-card'>
-          </div>
-          <div class='tableau' id='tableau-6'>
-            <img src='/images/td.png' class='playing-card'>
-          </div>
-          <div class='tableau' id='tableau-7'>
-            <img src='/images/8h.png' class='playing-card'>
-          </div>
-          <div class='tableau' id='tableau-8'>
-            <img src='/images/ah.png' class='playing-card draggable'>
-          </div>
+      <div class='col-6 freecell-frame' id='free-cells'>
+          <div class='cell dropzone'></div>
+          <div class='cell dropzone'></div>
+          <div class='cell dropzone'></div>
+          <div class='cell dropzone'></div>
+      </div>
+    </div>
+    <div class='row'>
+      <div class='col-12 tableau-frame'>
+        <div class='tableau' id='tableau-1'>
+          <img src='/images/jc.png' class='playing-card'>            
+          <img src='/images/jd.png' class='playing-card'>            
+          <img src='/images/qh.png' class='playing-card'>            
+          <img src='/images/7c.png' class='playing-card'>            
+          <img src='/images/8d.png' class='playing-card'>            
+          <img src='/images/9s.png' class='playing-card'>            
+          <img src='/images/th.png' class='playing-card'>            
+          <img src='/images/jc.png' class='playing-card active'>            
+        </div>
+        <div class='tableau' id='tableau-2'>
+          <img src='/images/ah.png' class='playing-card'>
+        </div>
+        <div class='tableau' id='tableau-3'>
+          <img src='/images/4s.png' class='playing-card'>
+        </div>
+        <div class='tableau' id='tableau-4'>
+          <img src='/images/7h.png' class='playing-card'>
+        </div>
+        <div class='tableau' id='tableau-5'>
+          <img src='/images/qc.png' class='playing-card'>
+        </div>
+        <div class='tableau' id='tableau-6'>
+          <img src='/images/td.png' class='playing-card'>
+        </div>
+        <div class='tableau' id='tableau-7'>
+          <img src='/images/8h.png' class='playing-card'>
+        </div>
+        <div class='tableau' id='tableau-8'>
+          <img src='/images/ah.png' class='playing-card draggable'>
         </div>
       </div>
     </div>
+  </div>
 </main>
+
+<FooterBar/>
 
 <style type="text/scss">
 .playing-card {
@@ -149,7 +158,6 @@
     margin-top: -8vw;
   }
 }
-
 
 /* draggable stuff */
 
