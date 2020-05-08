@@ -37,3 +37,11 @@
     </li>
   </ul>
 </nav>
+
+<style type="text/scss">
+
+.bg-dark {
+  background: rgba(0,48,0,1) !important;
+}
+  
+</style>

@@ -8,10 +8,3 @@ body {
   color: #ddd;
   overflow:hidden;
 }
-
-.bg-dark {
-  background: rgba(0,48,0,1) !important;
-}
-
-
-nav i { font-size: 1.5em; }
