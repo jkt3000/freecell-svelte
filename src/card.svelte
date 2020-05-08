@@ -2,7 +2,7 @@
   export let id = 'Kc';
 </script>
 
-<img src='/images/{id}.png' class='playing-card'>
+<img src='/images/{id}.png' id={id} class='playing-card draggable'>
 
 <style type="text/scss">
 

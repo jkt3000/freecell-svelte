@@ -8,3 +8,8 @@ body {
   color: #ddd;
   overflow:hidden;
 }
+
+.draggable {
+  touch-action: none;
+  user-select: none;  
+}

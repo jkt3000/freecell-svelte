@@ -1,4 +1,8 @@
+<script context="module">
+	import interact from "interactjs";
+</script>
 <script>
+	import { onMount } from 'svelte';
 	import FooterBar from './footer.svelte';
 	import HeaderBar from './header.svelte';
 	import Card from './card.svelte';
@@ -11,12 +15,73 @@
 			animation: true,
 			hints: true,
 			level: 'easy',
-			autoComplete: true			
+			autoComplete: true
 		}
 	};
 
 	let deck = new Deck(gameOpts.gameId);
 	let cards = deck.toTableau();
+
+	onMount(() => {
+		const position = { x: 0, y: 0 }
+
+		//
+		// drag action listeners
+		//
+		interact('.draggable').draggable({
+		  listeners: {
+		    start (event) {
+		    	console.log(event.type, event.target.id);
+		    	// if parent card is selected, make sure to drag all cards from
+		    	// parent -> child
+
+		    },
+		    move (event) {
+		    	let target = event.target,
+		    			x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
+		    			y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+
+		      target.style.transform = `translate(${x}px, ${y}px)`;
+		      target.setAttribute('data-x',x);
+		      target.setAttribute('data-y',y);
+
+		    },
+		    end (event) {
+		    	let target = event.target;
+		    	// check if dropped over valid spot
+		    		// if ok to leave there, update columns/cells
+		    		// if not ok, revert back to original spot
+
+		    	// move back to original spot	
+		    	target.removeAttribute("style")
+		    }
+		  }
+		});
+
+
+		//
+		// drop zone listeners
+		//
+		interact('.dropzone').dropzone({
+			accept: '.draggable',
+			dropactivate (event) {
+				let card = event.relatedTarget;
+				let zone = event.target;
+				console.log("drop zone activated", zone.id);
+				console.log("card is ", card.id);
+			},
+			ondrop (event) {
+				let card = event.relatedTarget;
+				let zone = event.target;
+				
+				console.log("drop zone dropped", zone.id);
+				console.log("card is ", card.id);
+			}
+
+
+		});
+
+	});
 </script>
 
 <HeaderBar/>
@@ -24,16 +89,16 @@
 	<div class='container-fluid'>
     <div class='row'>
       <div class='col-6 foundation-frame' id='home-cells'>
-        <div class='cell dropzone'><span>A</span></div>
-        <div class='cell dropzone'><span>A</span></div>
-        <div class='cell dropzone'><span>A</span></div>
-        <div class='cell dropzone'><span>A</span></div>
+        <div class='cell dropzone' id='homecell-1'><span>A</span></div>
+        <div class='cell dropzone' id='homecell-2'><span>A</span></div>
+        <div class='cell dropzone' id='homecell-3'><span>A</span></div>
+        <div class='cell dropzone' id='homecell-4'><span>A</span></div>
       </div>
       <div class='col-6 freecell-frame' id='free-cells'>
-        <div class='cell dropzone'></div>
-        <div class='cell dropzone'></div>
-        <div class='cell dropzone'></div>
-        <div class='cell dropzone'></div>
+        <div class='cell dropzone' id='freecell-1'></div>
+        <div class='cell dropzone' id='freecell-2'></div>
+        <div class='cell dropzone' id='freecell-3'></div>
+        <div class='cell dropzone' id='freecell-4'></div>
       </div>
     </div>
     <div class='row'>
