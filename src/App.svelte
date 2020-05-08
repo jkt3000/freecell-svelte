@@ -5,7 +5,7 @@
 	import {Deck} from './deck.js';
 
 	let gameOpts = {
-		id: 123,
+		gameId: 123,
 		settings: {
 			sound: true,
 			animation: true,
@@ -15,7 +15,7 @@
 		}
 	};
 
-	let deck = new Deck(gameOpts.id);
+	let deck = new Deck(gameOpts.gameId);
 	let cards = deck.toTableau();
 </script>
 
