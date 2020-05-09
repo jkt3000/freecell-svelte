@@ -1,12 +1,12 @@
 <script>
-  export let id = 'Kc';
+  export let id = undefined;
 </script>
-
+{#if (id != undefined)}
 <img src='/images/{id}.png' id={id} class='playing-card draggable'>
+{/if}
 
 <style type="text/scss">
-
-.playing-card {
+:global(.playing-card) {
   margin:0; padding:0;
   width: 11.5vw;
   height: 16.1vw;  // 11.5 * 1.4

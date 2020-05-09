@@ -1,15 +1,32 @@
-<script context="module">
+<script>	
 	import interact from "interactjs";
-</script>
-<script>
-	import { onMount } from 'svelte';
+	import {onMount} from 'svelte';
+
 	import FooterBar from './footer.svelte';
 	import HeaderBar from './header.svelte';
-	import Card from './card.svelte';
-	import {Deck} from './deck.js';
+	import Tableau from './tableau.svelte';
+	import HomeCell from './homecell.svelte';
+	import FreeCell from './freecell.svelte';
+
+	import {homecells, freecells, tableaus} from './stores.js';
+	import Deck from './deck.js';
+	import PlayingCard from './playing_card.js';
+
+
+	// subscribe to changing cells/tableaus
+  let home_cells, free_cells, tableau_cards;
+  const unsub_homecells = homecells.subscribe(value => {
+  	home_cells = value;
+  });
+	const unsub_freecells = freecells.subscribe(value => {
+  	free_cells = value;
+  });
+	const unsub_tab = tableaus.subscribe(value => {
+  	tableau_cards = value;
+  });
 
 	let gameOpts = {
-		gameId: 123,
+		gameId: 136363,
 		settings: {
 			sound: true,
 			animation: true,
@@ -18,13 +35,11 @@
 			autoComplete: true
 		}
 	};
+  let deck  = new Deck(gameOpts.gameId);
+	tableau_cards = deck.toTableau();
 
-	let deck = new Deck(gameOpts.gameId);
-	let cards = deck.toTableau();
 
-	onMount(() => {
-		const position = { x: 0, y: 0 }
-
+  onMount(() => {
 		//
 		// drag action listeners
 		//
@@ -32,28 +47,21 @@
 		  listeners: {
 		    start (event) {
 		    	console.log(event.type, event.target.id);
-		    	// if parent card is selected, make sure to drag all cards from
-		    	// parent -> child
-
 		    },
 		    move (event) {
-		    	let target = event.target,
-		    			x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
-		    			y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
-
+		    	let target = event.target;
+					let x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+					let y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
 		      target.style.transform = `translate(${x}px, ${y}px)`;
 		      target.setAttribute('data-x',x);
 		      target.setAttribute('data-y',y);
-
 		    },
 		    end (event) {
 		    	let target = event.target;
-		    	// check if dropped over valid spot
-		    		// if ok to leave there, update columns/cells
-		    		// if not ok, revert back to original spot
-
-		    	// move back to original spot	
-		    	target.removeAttribute("style")
+		    	target.removeAttribute("data-y");
+		    	target.removeAttribute("data-x");
+		    	target.removeAttribute("style");
+		    	console.log(event.type, event.target.id);
 		    }
 		  }
 		});
@@ -62,25 +70,68 @@
 		//
 		// drop zone listeners
 		//
-		interact('.dropzone').dropzone({
+
+		interact('.homecell').dropzone({
 			accept: '.draggable',
-			dropactivate (event) {
-				let card = event.relatedTarget;
+			ondragenter (event) {
 				let zone = event.target;
-				console.log("drop zone activated", zone.id);
-				console.log("card is ", card.id);
+				if (zone.childElementCount == 0) {
+			    zone.classList.add('drop-active');
+				}
+			},
+			ondragleave (event) {
+				event.target.classList.remove('drop-active');
+			},
+			ondrop (event) {
+				event.target.classList.remove('drop-active');
+
+				let card = event.relatedTarget;
+				let tCard = new PlayingCard(card.id);
+				let zone = event.target;
+				console.log(home_cells[zone.dataset.index]);
+				// if empty, only an A
+				if (home_cells[zone.dataset.index].length == 0) {
+					if (tCard.rank != 'A') {
+						console.error("not an A ", tCard)
+						return;
+					}	
+				} else {
+					let cCard_id = home_cells[zone.dataset.index][home_cells[zone.dataset.index].length -1]
+					let cCard = new PlayingCard(cCard_id);
+					console.log(tCard.rank_val, cCard.rank_val)
+					if ((tCard.suit != cCard.suit) || (tCard.rank_val != (cCard.rank_val + 1))) {
+						console.error("Not valid card", tCard, cCard);
+						return;
+					}
+				}
+
+				// ok to add				
+				home_cells[zone.dataset.index] = home_cells[zone.dataset.index].concat([card.id]);
+				let list = tableau_cards[card.parentNode.dataset.index];
+				let updated_list = list.filter(e => e !== card.id);
+				tableau_cards[card.parentNode.dataset.index] = updated_list;
+			}
+		});
+
+
+		interact('.freecell').dropzone({
+			accept: '.draggable',
+			ondragenter (event) {
+				let zone = event.target;
+				if (zone.childElementCount == 0) {
+			    zone.classList.add('drop-active');
+				}
+			},
+			ondragleave (event) {
+				event.target.classList.remove('drop-active');
 			},
 			ondrop (event) {
 				let card = event.relatedTarget;
 				let zone = event.target;
-				
-				console.log("drop zone dropped", zone.id);
-				console.log("card is ", card.id);
+				event.target.classList.remove('drop-active');
+				zone.appendChild(card);
 			}
-
-
 		});
-
 	});
 </script>
 
@@ -88,27 +139,21 @@
 <main>
 	<div class='container-fluid'>
     <div class='row'>
-      <div class='col-6 foundation-frame' id='home-cells'>
-        <div class='cell dropzone' id='homecell-1'><span>A</span></div>
-        <div class='cell dropzone' id='homecell-2'><span>A</span></div>
-        <div class='cell dropzone' id='homecell-3'><span>A</span></div>
-        <div class='cell dropzone' id='homecell-4'><span>A</span></div>
+      <div class='col-6 cellbox' id='home-cells'>
+      	{#each home_cells as cards, index}
+	      	<HomeCell cards={cards} index={index} />
+        {/each}
       </div>
-      <div class='col-6 freecell-frame' id='free-cells'>
-        <div class='cell dropzone' id='freecell-1'></div>
-        <div class='cell dropzone' id='freecell-2'></div>
-        <div class='cell dropzone' id='freecell-3'></div>
-        <div class='cell dropzone' id='freecell-4'></div>
+      <div class='col-6 cellbox' id='free-cells'>
+      	{#each free_cells as cards, index}
+	      	<FreeCell cards={cards} index={index} />
+        {/each}
       </div>
     </div>
     <div class='row'>
 			<div class='col-12 tableau-frame'>
-				{#each cards as column, index}
-					<div class='tableau' id="tableau-{index}">
-						{#each column as card}
-				  		<Card id={card}/>
-				  	{/each}
-					</div>
+				{#each tableau_cards as column, index}
+					<Tableau cards={column} index={index} />
 				{/each}
 			</div>
     </div>
@@ -118,81 +163,37 @@
 
 
 <style type="text/scss">
-	/* card is 400px x 560px */
-	.playing-card {
-	  margin:0; padding:0;
-	  width: 11.5vw;
-	  height: 16.1vw;  // 11.5 * 1.4
-	  border-radius: 0.5vw;
-	  box-shadow: 0px 0px 4px 1px rgba(0,0,0,0.5);
-	  &.faded {
-	    opacity: 0.1;    
-	  }
-	  &.active {
-	    box-shadow: 0px 0px 2vw 1vw rgba(255,255,0,0.5);
-	  }
+:global(.cell) {
+	:global(.playing-card) {
+		position:absolute !important;
+		top:0; left:0;
 	}
+}
 
-	.freecell-frame, .foundation-frame {
-	  margin:0;
-	  padding: 0 0.5vw;
-	  width: 50%;
-	  height: 20vw;
-	  display: flex;
-	  align-items: center;
-	  flex-flow: row nowrap;
-	  justify-content: space-between;
-	  .cell {
-	    display: flex;
-	    justify-content: center;
-	    align-items: center;
-	    width: 11.5vw;
-	    height: 16.1vw;
-	    background: rbga(255,0,0);
-	    border: 1px solid #161; 
-	    margin: 1px;
-	    span {
-	      font-weight: bold;
-	      font-size: 5vh; 
-	      color: rgba(0,0,0,0.2);      
-	    }
-	  }
-	  .cell.active {
-	    border: 1px solid #FFF; 
-	    background: rbga(255,255,255,0.5);
-	    box-shadow: 0px 0px 2vw 1vw rgba(255,255,0,0.5);
-	  }
-	}
-	.freecell-frame {
-	  justify-content: flex-end;
-	}
-	.foundation-frame {
-	  justify-content: flex-start;
-	}
+.cellbox {
+  margin:0;
+  padding: 0 0.5vw;
+  width: 50%;
+  height: 20vw;
+  display: flex;
+  align-items: center;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+}
 
+#free-cells {
+  justify-content: flex-end;
+}
+#home-cells {
+  justify-content: flex-start;
+}
 
-	.tableau-frame {
-	  height: 80vh;
-	  padding: 3vh 0;
-	  display: flex;
-	  flex-flow: row nowrap;
-	  justify-content: center;
-	}
-	.tableau {
-	  background: rgba(0,0,0,0.2);
-	  padding: 0; margin:0;
-	  width: 12vw;
-	  height: 70vh;
-	  margin: 0 1px;
-	  display: flex;
-	  align-items: center;
-	  flex-direction: column;
-	}
+.tableau-frame {
+  height: 80vh;
+  padding: 3vh 0;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+}
 
-	/* draggable stuff */
-
-	.draggable {
-	  touch-action: none;
-	  user-select: none;
-	}
 </style>

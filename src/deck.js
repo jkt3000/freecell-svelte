@@ -19,7 +19,7 @@ const PLAYING_CARDS = {
   suits: ['c', 'd', 'h', 's']
 }
 
-export class Deck {
+export default class Deck {
   // generates a new random deck based on unique game_id
   constructor(seed) {
     this.cards = [];

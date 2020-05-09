@@ -13,3 +13,11 @@ body {
   touch-action: none;
   user-select: none;  
 }
+.drop-active {
+  border:  1px solid red !important;
+}
+
+.bg-dark {
+  background: rgba(0,48,0,1) !important;
+}
+  
