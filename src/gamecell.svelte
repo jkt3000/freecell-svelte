@@ -4,11 +4,12 @@
   export let cards = [];
   export let index;  
   export let type;
+  export let draggable = true;
 </script>
 
 <div class='cell {type}' data-index={index}>
   {#each cards as card}
-    <Card id={card}/>
+    <Card id={card} draggable={draggable}/>
   {/each}
 </div>
 

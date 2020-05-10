@@ -97,9 +97,6 @@
               (Game.cardSuit(card_id) == Game.cardSuit(last_card))) {
             Game.moveCard(fromIndex, toIndex, card_id);
           }
-
-          // if (card.val == card2.val + 1) && (card.suit == card2.suit)
-          // 
         }
       }
     });
@@ -174,7 +171,7 @@
     <div class='row headboard'>    
       <div class='cells-board homecells'>
         {#each Array(4) as _, index}
-          <GameCell cards={$columns[index + HOMECELL_OFFSET]} index={index + HOMECELL_OFFSET}  type='homecell'/>
+          <GameCell cards={$columns[index + HOMECELL_OFFSET]} index={index + HOMECELL_OFFSET}  type='homecell' draggable={false}/>
         {/each}
       </div>
       <div class='cells-board freecells'>

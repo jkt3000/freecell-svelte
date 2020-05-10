@@ -1,10 +1,11 @@
 <script>
   export let id = undefined;
+  export let draggable = true;
 </script>
 
 
 {#if (id != undefined)}
-  <img src='/images/{id}.png' id={id} alt="{id}" class='playing-card draggable'>
+  <img src='/images/{id}.png' id={id} alt="{id}" class='playing-card' class:draggable>
 {/if}
 
 
