@@ -1,21 +1,17 @@
 <script>
   import interact from 'interactjs';
-  import { columns } from './stores.js'; /* data store */
   import { onMount } from 'svelte';
-
-
-  const HOMECELL_OFFSET = 8;
-  const FREECELL_OFFSET = 12;
   /* partials */
   import GameCell from './gamecell.svelte';
   import Tableau from './tableau.svelte';
 
   /* logic stuff */
+  import { columns } from './stores.js'; /* data store */
   import Deck from './deck.js';
+  const HOMECELL_OFFSET = 8;
+  const FREECELL_OFFSET = 12;
   
   export let gameId = parseInt(Math.random() * 1000000);
-
-  function log(e) { console.log("Log fn: ",e) }
 
   let Game = {
     ranks: ['A','2','3','4','5','6','7','8','9','T','J','Q','K'],
@@ -36,31 +32,12 @@
     },
     addCard: function(list, cardId) {
       return list.concat(cardId);
+    },
+    moveCard: function(fromIndex, toIndex, card) {
+      $columns[fromIndex] = $columns[fromIndex].filter(i => i !== card);
+      $columns[toIndex] = $columns[toIndex].concat(card);
     }
   }
-
-  const listeners = {
-    log: function (event) {
-      console.log("[Log]: ",event);
-    },
-    trackCardMove: function(event) {
-      let card = event.target;
-      let x = (parseFloat(card.getAttribute('data-x')) || 0) + event.dx;
-      let y = (parseFloat(card.getAttribute('data-y')) || 0) + event.dy;
-      card.style.transform = `translate(${x}px, ${y}px)`;
-      card.setAttribute('data-x',x);
-      card.setAttribute('data-y',y);
-    },
-    updateCardMove: function(event) {
-      let card = event.target;
-      card.removeAttribute("data-y");
-      card.removeAttribute("data-x");
-      card.removeAttribute("style");
-      console.log(event.type, event.target.id);
-      event.target.style.zIndex = undefined;
-    }
-  }
-
 
 
   /* listeners */
@@ -69,23 +46,21 @@
     interact('.freecell').dropzone({
       accept: '.draggable',
       ondragenter: function(e) {
-        let cell = e.target;
-        let cell_id = cell.dataset.index;
+        let zone = e.target;
+        let index = zone.dataset.index;
         // highlight drop area if empty
-        if ($columns[cell_id].length == 0) cell.classList.add('drop-active');  
+        if ($columns[index].length == 0) zone.classList.add('drop-active');  
       },
       ondragleave: function(e) {
         e.target.classList.remove('drop-active');
       },
       ondrop: function(e){
         e.target.classList.remove('drop-active');
-
-        let card_id = e.relatedTarget.id;
-        let tabl_id = e.relatedTarget.parentNode.dataset.index;
-        let cell_id = e.target.dataset.index;
-        if ($columns[cell_id].length == 0) {
-          $columns[tabl_id] = $columns[tabl_id].filter(item => item !== card_id);
-          $columns[cell_id] = $columns[cell_id].concat(card_id);
+        let card_id   = e.relatedTarget.id;
+        let fromIndex = e.relatedTarget.parentNode.dataset.index;
+        let toIndex   = e.target.dataset.index;
+        if ($columns[toIndex].length == 0) {
+          Game.moveCard(fromIndex, toIndex, card_id);
         }
       }
     });
@@ -94,10 +69,10 @@
     interact('.homecell').dropzone({
       accept: '.draggable',
       ondragenter: function(e) {
-        let cell = e.target;
-        let cell_id = cell.dataset.index;
+        let zone = e.target;
+        let index = zone.dataset.index;
         // highlight drop area if empty
-        if ($columns[cell_id].length == 0) cell.classList.add('drop-active');        
+        if ($columns[index].length == 0) zone.classList.add('drop-active');        
       },
       ondragleave: function(e) {
         e.target.classList.remove('drop-active');
@@ -105,26 +80,26 @@
       ondrop: function(e){
         e.target.classList.remove('drop-active');
 
-        let card_id = e.relatedTarget.id;
-        let tabl_id = e.relatedTarget.parentNode.dataset.index;
-        let cell_id = e.target.dataset.index;
-        console.log("Drop activated on Homcell "+cell_id, card_id, "from " +tabl_id)
+        let card_id   = e.relatedTarget.id;
+        let fromIndex = e.relatedTarget.parentNode.dataset.index;
+        let toIndex   = e.target.dataset.index;
 
         // if empty, accept only A
-        if ($columns[cell_id].length == 0) {
+        if ($columns[toIndex].length == 0) {
           console.log("cell is empty")
           if (Game.cardRank(card_id) == 'A') {
-            $columns[tabl_id] = $columns[tabl_id].filter(item => item !== card_id);
-            $columns[cell_id] = $columns[cell_id].concat(card_id);
+            Game.moveCard(fromIndex, toIndex, card_id);
           }
-        } else if ($columns[cell_id].length > 0) {
+        } else if ($columns[toIndex].length > 0) {
           // if not empty, accept only same suit and 1 greater than last card
-          let last_card = $columns[cell_id][$columns[cell_id].length-1];
+          let last_card = $columns[toIndex][$columns[toIndex].length-1];
           if ((Game.cardVal(card_id) == Game.cardVal(last_card) + 1) && 
               (Game.cardSuit(card_id) == Game.cardSuit(last_card))) {
-            $columns[tabl_id] = Game.removeCard($columns[tabl_id], card_id);
-            $columns[cell_id] = Game.addCard($columns[cell_id], card_id);
+            Game.moveCard(fromIndex, toIndex, card_id);
           }
+
+          // if (card.val == card2.val + 1) && (card.suit == card2.suit)
+          // 
         }
       }
     });
@@ -142,37 +117,48 @@
         drop (e) {
           e.target.classList.remove('drop-active');  
 
-          let card_id = e.relatedTarget.id;
-          let tabl_id = e.relatedTarget.parentNode.dataset.index;
-          let cell_id = e.target.dataset.index;
-          console.log("target", e.target)
-          console.log(e, tabl_id, cell_id, card_id);
+          let card_id   = e.relatedTarget.id;
+          let fromIndex = e.relatedTarget.parentNode.dataset.index;
+          let toIndex   = e.target.dataset.index;
+
           //if card is dropped on same column, do nothing
-          if (tabl_id == cell_id ) {
+          if (fromIndex == toIndex ) {
             console.log("trying to drop onto same column - ignore");
             return;
           }
-          let last_card = $columns[cell_id][$columns[cell_id].length - 1];
-          console.log("Drop column last card", last_card)
-          console.log("dragged card", card_id)
+
+          let last_card = $columns[toIndex][$columns[toIndex].length - 1];
+          console.log("last card", last_card, "curr card", card_id)          
           // if last card is alternate color and 1 greater than card
           if ((Game.cardColor(last_card) != Game.cardColor(card_id)) && 
               (Game.cardVal(last_card) == Game.cardVal(card_id) + 1)) {
-            $columns[tabl_id] = Game.removeCard($columns[tabl_id], card_id);
-            $columns[cell_id] = Game.addCard($columns[cell_id], card_id);
-            console.log("moving card " + card_id + " from col " + tabl_id + " to " + cell_id);
+            Game.moveCard(fromIndex, toIndex, card_id);
           }
         } 
       }
     });
 
-    /* card */
+    /* card listener */
     interact('.draggable').draggable({
-      onstart: function(e) {
-        e.target.style.zIndex = 10000;
+      onstart: function(event) {
+        event.target.style.zIndex = 10000;
       },
-      onmove: listeners.trackCardMove,
-      onend: listeners.updateCardMove
+      onmove: function(event) {
+        let card = event.target;
+        let x = (parseFloat(card.getAttribute('data-x')) || 0) + event.dx;
+        let y = (parseFloat(card.getAttribute('data-y')) || 0) + event.dy;
+        card.style.transform = `translate(${x}px, ${y}px)`;
+        card.setAttribute('data-x',x);
+        card.setAttribute('data-y',y);
+      },        
+      onend: function(event) {
+        let card = event.target;
+        card.removeAttribute("data-y");
+        card.removeAttribute("data-x");
+        card.removeAttribute("style");
+        console.log(event.type, event.target.id);
+        event.target.style.zIndex = undefined;        
+      }
     });
   });
 
@@ -198,7 +184,7 @@
       </div>
     </div>
     <div class='row tableaus'>
-      {#each Array(8) as cards, index}
+      {#each Array(8) as _, index}
         <Tableau cards={$columns[index]} index={index} />
       {/each}
     </div>
