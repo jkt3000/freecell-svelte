@@ -6,11 +6,9 @@
 </script>
 
 <div class='cell' data-index={index}>
-  {#if cards.length != 0}
-    <Card id={cards[0]}/>
-  {:else}
-    &nbsp;
-  {/if}
+  {#each cards as card}
+    <Card id={card}/>
+  {/each}
 </div>
 
 

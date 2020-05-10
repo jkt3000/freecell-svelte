@@ -12,6 +12,7 @@
 
   function setGameSettings() {};
 </script>
+      
 
 <nav class="navbar fixed-bottom navbar-dark bg-dark p-0">
   <ul class="nav justify-content-around" style='width:100%'>
