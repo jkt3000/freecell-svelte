@@ -3,9 +3,10 @@
 
   export let cards = [];
   export let index;  
+  export let type;
 </script>
 
-<div class='cell' data-index={index}>
+<div class='cell {type}' data-index={index}>
   {#each cards as card}
     <Card id={card}/>
   {/each}

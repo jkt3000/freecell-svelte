@@ -15,6 +15,7 @@
     height: 16.1vw;  // 11.5 * 1.4
     border-radius: 0.5vw;
     box-shadow: 0px 0px 4px 1px rgba(0,0,0,0.5);
+    z-index:1000;
     &.faded {
       opacity: 0.1;    
     }
