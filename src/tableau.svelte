@@ -16,15 +16,16 @@
     }
   }
 
+  /* recursive */
   function validChild(card, cards) {
     if (cards.length === 0) {
       return true; // curr card is last one
     } else {
       let list = [...cards];
-      let next_card = list.pop();
-      let this_status = (Game.cardVal(card) === Game.cardVal(next_card) + 1) &&
-      (Game.cardColor(card) !== Game.cardColor(next_card))
-      return validChild(next_card, list) && (this_status);
+      let child_card = list.shift();
+      let this_status = (Game.cardVal(card) === Game.cardVal(child_card) + 1) &&
+      (Game.cardColor(card) !== Game.cardColor(child_card));
+      return validChild(child_card, list) && (this_status);
     }
   }
 </script>

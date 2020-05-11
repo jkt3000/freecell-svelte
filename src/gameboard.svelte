@@ -50,8 +50,13 @@ function selectCards(card, index) {
       return document.getElementById(card);
     });
   }
-  console.log(selected);
   return selected;
+}
+
+function emptyFreeCells() {
+  let freecells = $columns.slice(FREECELL_OFFSET);
+  console.log(freecells.map(e => e.length));
+  return freecells.filter(c => { return (c.length == 0); }).length;
 }
 
   /* listeners */
@@ -73,6 +78,10 @@ function selectCards(card, index) {
         let card_id   = e.relatedTarget.id;
         let fromIndex = e.relatedTarget.parentNode.dataset.index;
         let toIndex   = e.target.dataset.index;
+
+        let selected = selectCards(card_id, fromIndex);
+        if (selected.length > 1) { return; } // don't allow drop onto freecell if more than 1 card
+
         if ($columns[toIndex].length == 0) {
           Game.moveCard(fromIndex, toIndex, card_id);
         }
@@ -97,6 +106,9 @@ function selectCards(card, index) {
         let card_id   = e.relatedTarget.id;
         let fromIndex = e.relatedTarget.parentNode.dataset.index;
         let toIndex   = e.target.dataset.index;
+
+        let selected = selectCards(card_id, fromIndex);
+        if (selected.length > 1) { return; } // don't allow drop onto freecell if more than 1 card
 
         // if empty, accept only A
         if ($columns[toIndex].length == 0) {
@@ -137,13 +149,19 @@ function selectCards(card, index) {
             console.log("trying to drop onto same column - ignore");
             return;
           }
+          // only allow if # of empty freecells >= selected count
+          let selected = selectCards(card_id, fromIndex);
+          if (selected.length - 1 > emptyFreeCells()) {
+            console.log("Not enough empty slots to make move", emptyFreeCells());
+            return;
+          }
 
           let last_card = $columns[toIndex].slice(-1).pop();
           console.log("last card", last_card, "curr card", card_id)          
           // if last card is alternate color and 1 greater than card
           if ((Game.cardColor(last_card) != Game.cardColor(card_id)) && 
               (Game.cardVal(last_card) == Game.cardVal(card_id) + 1)) {
-            Game.moveCard(fromIndex, toIndex, card_id);
+            selected.forEach(el => Game.moveCard(fromIndex, toIndex, el.id));
           }
         } 
       }

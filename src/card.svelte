@@ -31,7 +31,7 @@
     }
 
     .playing-card {
-      margin-top: -8vw;
+      margin-top: -10vw;
     }
   }
 </style>
