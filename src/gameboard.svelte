@@ -7,9 +7,9 @@
 
   import {columns} from './stores.js'; /* data store */
   
-  export let gameId = parseInt(Math.random() * 1000000);
+  export let gameId = parseInt((Math.random() * 1000000), 10);
 
-  
+
   const Game = {
     HOMECELL_OFFSET: 8,
     FREECELL_OFFSET: 12,
@@ -28,33 +28,33 @@
     "Qc", "Qd", "Qh", "Qs", 
     "Kc", "Kd", "Kh", "Ks" 
     ],
-    ranks: ['A','2','3','4','5','6','7','8','9','T','J','Q','K'],
+    RANKS: ['A','2','3','4','5','6','7','8','9','T','J','Q','K'],
     cardRank(card) { return card[0] },
     cardSuit(card) { return card[1] },
     cardColor(card) { 
       return (card[1] == 'c' || card[1] == 's') ? 'black' : 'red'; 
     },
     cardVal(card) { 
-      return this.ranks.indexOf(card[0]) 
+      return this.RANKS.indexOf(card[0]);
     },
     removeCard(list, card) { 
-      return list.filter(item => item !== card) 
+      return list.filter(item => item !== card);
     },
     addCard(list, card) { 
-      return list.concat(card) 
+      return list.concat(card); 
     },
     moveCard(fromIndex, toIndex, card) {
       $columns[fromIndex] = this.removeCard($columns[fromIndex], card);
       $columns[toIndex]   = this.addCard($columns[toIndex], card);
     },
     alternateColors(c1, c2) { 
-      return (this.cardColor(c1) !== this.cardColor(c2)) 
+      return (this.cardColor(c1) !== this.cardColor(c2));
     },
     descendingRank(c1, c2) { 
-      return (this.cardVal(c1) === this.cardVal(c2) + 1) 
+      return (this.cardVal(c1) === this.cardVal(c2) + 1);
     },
     ascendingRank(c1, c2) { 
-      return this.descendingRank(c2, c1) 
+      return this.descendingRank(c2, c1); 
     },
     validParent(parent, child) {
       return (this.descendingRank(parent, child)) && 
@@ -117,14 +117,10 @@
       }
 
       toTableau() {
-        let columns = 8;
-        let tableaus = [ 
-          new Array(), new Array(), new Array(), new Array(),
-          new Array(), new Array(), new Array(), new Array()
-        ];
+        let tableaus = [ [],[],[],[], [],[],[],[] ];
         let i = 0;
         while (!this.empty) {
-          tableaus[i++ % columns].unshift(this.pop());
+          tableaus[i++ % tableaus.length].unshift(this.pop());
         }
         return tableaus;
       }
@@ -305,9 +301,9 @@
   });
 
   /* start up a new game */
-  let deck = new Game.Deck(gameId);
+  let deck  = new Game.Deck(gameId);
   let cards = deck.toTableau();
-  $columns = cards.concat([[],[],[],[],[],[],[],[]]);
+  $columns  = cards.concat([[],[],[],[],[],[],[],[]]);
 </script>
 
 
