@@ -15,68 +15,62 @@
 
   let Game = {
     ranks: ['A','2','3','4','5','6','7','8','9','T','J','Q','K'],
-    cardRank: function(id) {
-      return id[0];
+    cardRank(card) { return card[0] },
+    cardSuit(card) { return card[1] },
+    cardColor(card) { 
+      return (card[1] == 'c' || card[1] == 's') ? 'black' : 'red'; 
     },
-    cardColor: function(id){
-      return (id[1] == 'c' || id[1] == 's') ? 'black' : 'red';
+    cardVal(card) { 
+      return this.ranks.indexOf(card[0]) 
     },
-    cardSuit: function(id){
-      return id[1];
+    removeCard(list, card) { 
+      return list.filter(item => item !== card) 
     },
-    cardVal: function(id) {
-      return this.ranks.indexOf(id[0]);
+    addCard(list, card) { 
+      return list.concat(card) 
     },
-    removeCard: function(list, cardId) {
-      return list.filter (item => item !== cardId);      
+    moveCard(fromIndex, toIndex, card) {
+      $columns[fromIndex] = this.removeCard($columns[fromIndex], card);
+      $columns[toIndex]   = this.addCard($columns[toIndex], card);
     },
-    addCard: function(list, cardId) {
-      return list.concat(cardId);
+    alternateColors(c1, c2) { 
+      return (this.cardColor(c1) !== this.cardColor(c2)) 
     },
-    moveCard: function(fromIndex, toIndex, card) {
-      $columns[fromIndex] = $columns[fromIndex].filter(i => i !== card);
-      $columns[toIndex] = $columns[toIndex].concat(card);
+    descendingRank(c1, c2) { 
+      return (this.cardVal(c1) === this.cardVal(c2) + 1) 
     },
-    alternateColors: function(c1, c2) {
-      return (this.cardColor(c1) !== this.cardColor(c2));
+    ascendingRank(c1, c2) { 
+      return this.descendingRank(c2, c1) 
     },
-    descendingRank: function(c1, c2) {
-      return (this.cardVal(c1) === this.cardVal(c2) + 1);
+    validParent(parent, child) {
+      return (this.descendingRank(parent, child)) && 
+             (this.alternateColors(parent, child));
     },
-    ascendingRank: function(c1, c2) {
-      return this.descendingRank(c2, c1);
+    findEmptyHomeCell() {
+      return this.findEmptyCell(HOMECELL_OFFSET);
     },
-
-    // return true if parentCard is ok for child
-    validParent: function(parentCard, childCard) {
-      return (this.descendingRank(parentCard, childCard)) && 
-             (this.alternateColors(parentCard, childCard));
+    findEmptyFreeCell() {
+      return this.findEmptyCell(FREECELL_OFFSET);
     },
-    // returns index of first empty homecell, or undefined
-    findEmptyHomeCell: function(){
+    findEmptyCell(offset) {
       for (let i=0; i < 4; i++) {
-        let index = HOMECELL_OFFSET + i;
+        let index = offset + i;
         if ($columns[index].length == 0) return index;
       }
     },
-
-    // returns index of first empty freecell, or -1 if not found
-    findEmptyFreeCell: function(){
-      for (let i=0; i < 4; i++) {
-        let index = FREECELL_OFFSET + i;
-        if ($columns[index].length == 0) return index;
-      }      
+    numEmptyFreeCells() {
+      let freecells = $columns.slice(FREECELL_OFFSET);
+      return freecells.filter(c => { return (c.length === 0); }).length;
     },
-    // returns index of first tableau not of column that can accept card
-    // or -1 if invalid
-    findValidParent: function(card_id, column) {
+
+    findValidHomeCell(card) {
+      return;
+    },
+    findValidParent: function(card, index) {
       for (let i=0; i < 8; i++) {
-        if (i === column) continue;
-        let parentCard = [...$columns[i]].slice(-1).pop();
-        console.log("checking parent ", parentCard, card_id)
-        if (Game.validParent(parentCard, card_id)) {
-          return i;
-        }
+        if (i === index) continue;
+        let parent = [...$columns[i]].slice(-1).pop();
+        if (Game.validParent(parent, card)) return i;
       }
     }
   }
@@ -84,33 +78,28 @@
   /* returns array of selected cards for dragging */
   function selectCards(card, index) {
     let selected = [];
-    let cardIndex = $columns[index].indexOf(card);
-    if (cardIndex + 1 == $columns[index].length) {
+    let cards = $columns[index];
+    let cardIndex = cards.indexOf(card);
+    if (cardIndex + 1 === cards.length) {
       selected.push(document.getElementById(card));
     } else {
-      selected = $columns[index].slice(cardIndex).map(card => {
-        return document.getElementById(card);
+      selected = cards.slice(cardIndex).map(id => {
+        return document.getElementById(id);
       });
     }
     return selected;
   }
 
 
-  function emptyFreeCells() {
-    let freecells = $columns.slice(FREECELL_OFFSET);
-    console.log(freecells.map(e => e.length));
-    return freecells.filter(c => { return (c.length == 0); }).length;
-  }
-
   /* listeners */
   onMount(() => {
+
     /* free cell */
     interact('.freecell').dropzone({
       accept: '.draggable',
       ondragenter: function(e) {
         let zone = e.target;
         let index = zone.dataset.index;
-        // highlight drop area if empty
         if ($columns[index].length == 0) zone.classList.add('drop-active');  
       },
       ondragleave: function(e) {
@@ -118,15 +107,14 @@
       },
       ondrop: function(e){
         e.target.classList.remove('drop-active');
-        let card_id   = e.relatedTarget.id;
+        let card      = e.relatedTarget.id;
         let fromIndex = e.relatedTarget.parentNode.dataset.index;
         let toIndex   = e.target.dataset.index;
+        let selected  = selectCards(card, fromIndex);
+        if (selected.length > 1) { return; } // don't allow drop if moving more than 1 card
 
-        let selected = selectCards(card_id, fromIndex);
-        if (selected.length > 1) { return; } // don't allow drop onto freecell if more than 1 card
-
-        if ($columns[toIndex].length == 0) {
-          Game.moveCard(fromIndex, toIndex, card_id);
+        if ($columns[toIndex].length === 0) {
+          Game.moveCard(fromIndex, toIndex, card);
         }
       }
     });
@@ -137,34 +125,28 @@
       ondragenter: function(e) {
         let zone = e.target;
         let index = zone.dataset.index;
-        // highlight drop area if empty
-        if ($columns[index].length == 0) zone.classList.add('drop-active');        
+        if ($columns[index].length === 0) zone.classList.add('drop-active');        
       },
       ondragleave: function(e) {
         e.target.classList.remove('drop-active');
       },
       ondrop: function(e){
         e.target.classList.remove('drop-active');
-        
-        let card_id   = e.relatedTarget.id;
+        let card   = e.relatedTarget.id;
         let fromIndex = e.relatedTarget.parentNode.dataset.index;
         let toIndex   = e.target.dataset.index;
+        let selected  = selectCards(card, fromIndex);
 
-        let selected = selectCards(card_id, fromIndex);
-        if (selected.length > 1) { return; } // don't allow drop onto freecell if more than 1 card
-
-        // if empty, accept only A
-        if ($columns[toIndex].length == 0) {
-          console.log("cell is empty")
-          if (Game.cardRank(card_id) == 'A') {
-            Game.moveCard(fromIndex, toIndex, card_id);
+        if ($columns[toIndex].length === 0) {
+          // if empty, accept only A
+          if (Game.cardRank(card) === 'A') {
+            Game.moveCard(fromIndex, toIndex, card);
           }
         } else if ($columns[toIndex].length > 0) {
           // if not empty, accept only same suit and 1 greater than last card
           let last_card = $columns[toIndex].slice(-1).pop();
-          if ((Game.cardVal(card_id) == Game.cardVal(last_card) + 1) && 
-              (Game.cardSuit(card_id) == Game.cardSuit(last_card))) {
-            Game.moveCard(fromIndex, toIndex, card_id);
+          if (!Game.alternateColors(card, last_card) && Game.ascendingRank(last_card, card)) {
+            Game.moveCard(fromIndex, toIndex, card);
           }
         }
       }
@@ -182,28 +164,25 @@
         },
         drop (e) {
           e.target.classList.remove('drop-active');  
-
-          let card_id   = e.relatedTarget.id;
+          let card      = e.relatedTarget.id;
           let fromIndex = e.relatedTarget.parentNode.dataset.index;
           let toIndex   = e.target.dataset.index;
 
           //if card is dropped on same column, do nothing
-          if (fromIndex == toIndex ) {
-            console.log("trying to drop onto same column - ignore");
-            return;
-          }
+          if (fromIndex === toIndex ) { return; }
+
           // only allow if # of empty freecells >= selected count
-          let selected = selectCards(card_id, fromIndex);
-          if (selected.length - 1 > emptyFreeCells()) {
-            console.log("Not enough empty slots to make move", emptyFreeCells());
+          let selected = selectCards(card, fromIndex);
+          if (selected.length - 1 > Game.numEmptyFreeCells()) {
+            console.log("Not enough empty slots to make move", Game.numEmptyFreeCells());
+            console.log(`Need ${selected.length-1} spaces, only have ${Game.numEmptyFreeCells()}`);
             return;
           }
 
           let last_card = $columns[toIndex].slice(-1).pop();
-          console.log("last card", last_card, "curr card", card_id)          
+          console.log("last card", last_card, "curr card", card)          
           // if last card is alternate color and 1 greater than card
-          if ((Game.cardColor(last_card) != Game.cardColor(card_id)) && 
-              (Game.cardVal(last_card) == Game.cardVal(card_id) + 1)) {
+          if (Game.alternateColors(last_card, card) && Game.descendingRank(last_card, card)) {
             selected.forEach(el => Game.moveCard(fromIndex, toIndex, el.id));
           }
         } 
@@ -214,32 +193,30 @@
     interact('.draggable').draggable({     
       onstart: function(event) {
         console.log('onstart')
-        let card = event.target;
+        let el = event.target;
         let index = event.target.parentNode.dataset.index;
 
         // if not last card, get all subsequent cards and move them all
-        let selected = selectCards(card.id, index);
-        selected.forEach(el => {
-          el.style.zIndex = 10000;
-        });
+        let selected = selectCards(el.id, index);
+        selected.forEach(el => el.style.zIndex = 10000);
       },
       onmove: function(event) {
-        let card = event.target;
+        let el = event.target;
         let index = event.target.parentNode.dataset.index;
 
-        let selected = selectCards(card.id, index);
+        let selected = selectCards(el.id, index);
         selected.forEach(el => {
-          let x = (parseFloat(card.getAttribute('data-x')) || 0) + event.dx;
-          let y = (parseFloat(card.getAttribute('data-y')) || 0) + event.dy;
+          let x = (parseFloat(el.getAttribute('data-x')) || 0) + event.dx;
+          let y = (parseFloat(el.getAttribute('data-y')) || 0) + event.dy;
           el.style.transform = `translate(${x}px, ${y}px)`;
           el.setAttribute('data-x',x);
           el.setAttribute('data-y',y);
         });
       },        
       onend: function(event) {
-        let card = event.target;
+        let el = event.target;
         let index = event.target.parentNode.dataset.index;
-        let selected = selectCards(card.id, index);
+        let selected = selectCards(el.id, index);
         selected.forEach(el => {
           el.removeAttribute("data-y");
           el.removeAttribute("data-x");
@@ -250,27 +227,29 @@
     });
 
     interact('.draggable').on('tap', function(event){
-      let card = event.target;
+      let el = event.target;
       let index = event.target.parentNode.dataset.index;
-      let selected = selectCards(card.id, index);
+      let selected = selectCards(el.id, index);
       if (selected.length > 1) return;
-      console.log(`autocomplete ${card.id}`)
-      if (Game.cardRank(card.id) == 'A') {
+
+      console.log(`Autocomplete action for ${el.id}`)
+      if (Game.cardRank(el.id) === 'A') {
         let toIndex = Game.findEmptyHomeCell();
         if (toIndex >= 0) {
-          console.log("moving A to empty homecell")
-          Game.moveCard(index, toIndex, card.id);
+          console.log("moving card to empty homecell")
+          Game.moveCard(index, toIndex, el.id);
           return;
         }
       }
 
-      let toIndex = Game.findValidParent(card.id) || Game.findEmptyFreeCell();
+      let toIndex = Game.findValidHomeCell(el.id) || Game.findValidParent(el.id) || Game.findEmptyFreeCell();
+      // find valid next homecell spot
       if (toIndex > 0) {
         // if viable parent in tableau, move to that spot
-        Game.moveCard(index, toIndex, card.id);
+        Game.moveCard(index, toIndex, el.id);
       } else {
         // no valid move found
-        console.log("No valid move found")
+        console.log("No valid move found");
       }
   
     })
