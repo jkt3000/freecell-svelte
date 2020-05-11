@@ -36,28 +36,71 @@
     moveCard: function(fromIndex, toIndex, card) {
       $columns[fromIndex] = $columns[fromIndex].filter(i => i !== card);
       $columns[toIndex] = $columns[toIndex].concat(card);
+    },
+    alternateColors: function(c1, c2) {
+      return (this.cardColor(c1) !== this.cardColor(c2));
+    },
+    descendingRank: function(c1, c2) {
+      return (this.cardVal(c1) === this.cardVal(c2) + 1);
+    },
+    ascendingRank: function(c1, c2) {
+      return this.descendingRank(c2, c1);
+    },
+
+    // return true if parentCard is ok for child
+    validParent: function(parentCard, childCard) {
+      return (this.descendingRank(parentCard, childCard)) && 
+             (this.alternateColors(parentCard, childCard));
+    },
+    // returns index of first empty homecell, or undefined
+    findEmptyHomeCell: function(){
+      for (let i=0; i < 4; i++) {
+        let index = HOMECELL_OFFSET + i;
+        if ($columns[index].length == 0) return index;
+      }
+    },
+
+    // returns index of first empty freecell, or -1 if not found
+    findEmptyFreeCell: function(){
+      for (let i=0; i < 4; i++) {
+        let index = FREECELL_OFFSET + i;
+        if ($columns[index].length == 0) return index;
+      }      
+    },
+    // returns index of first tableau not of column that can accept card
+    // or -1 if invalid
+    findValidParent: function(card_id, column) {
+      for (let i=0; i < 8; i++) {
+        if (i === column) continue;
+        let parentCard = [...$columns[i]].slice(-1).pop();
+        console.log("checking parent ", parentCard, card_id)
+        if (Game.validParent(parentCard, card_id)) {
+          return i;
+        }
+      }
     }
   }
 
-/* returns array of selected cards for dragging */
-function selectCards(card, index) {
-  let selected = [];
-  let cardIndex = $columns[index].indexOf(card);
-  if (cardIndex + 1 == $columns[index].length) {
-    selected.push(document.getElementById(card));
-  } else {
-    selected = $columns[index].slice(cardIndex).map(card => {
-      return document.getElementById(card);
-    });
+  /* returns array of selected cards for dragging */
+  function selectCards(card, index) {
+    let selected = [];
+    let cardIndex = $columns[index].indexOf(card);
+    if (cardIndex + 1 == $columns[index].length) {
+      selected.push(document.getElementById(card));
+    } else {
+      selected = $columns[index].slice(cardIndex).map(card => {
+        return document.getElementById(card);
+      });
+    }
+    return selected;
   }
-  return selected;
-}
 
-function emptyFreeCells() {
-  let freecells = $columns.slice(FREECELL_OFFSET);
-  console.log(freecells.map(e => e.length));
-  return freecells.filter(c => { return (c.length == 0); }).length;
-}
+
+  function emptyFreeCells() {
+    let freecells = $columns.slice(FREECELL_OFFSET);
+    console.log(freecells.map(e => e.length));
+    return freecells.filter(c => { return (c.length == 0); }).length;
+  }
 
   /* listeners */
   onMount(() => {
@@ -202,9 +245,35 @@ function emptyFreeCells() {
           el.removeAttribute("data-x");
           el.removeAttribute("style");
           el.style.zIndex = undefined;
-        });        
-      }
+        });
+      }      
     });
+
+    interact('.draggable').on('tap', function(event){
+      let card = event.target;
+      let index = event.target.parentNode.dataset.index;
+      let selected = selectCards(card.id, index);
+      if (selected.length > 1) return;
+      console.log(`autocomplete ${card.id}`)
+      if (Game.cardRank(card.id) == 'A') {
+        let toIndex = Game.findEmptyHomeCell();
+        if (toIndex >= 0) {
+          console.log("moving A to empty homecell")
+          Game.moveCard(index, toIndex, card.id);
+          return;
+        }
+      }
+
+      let toIndex = Game.findValidParent(card.id) || Game.findEmptyFreeCell();
+      if (toIndex > 0) {
+        // if viable parent in tableau, move to that spot
+        Game.moveCard(index, toIndex, card.id);
+      } else {
+        // no valid move found
+        console.log("No valid move found")
+      }
+  
+    })
   });
 
   /* start up a new game */
