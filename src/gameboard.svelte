@@ -39,6 +39,20 @@
     }
   }
 
+/* returns array of selected cards for dragging */
+function selectCards(card, index) {
+  let selected = [];
+  let cardIndex = $columns[index].indexOf(card);
+  if (cardIndex + 1 == $columns[index].length) {
+    selected.push(document.getElementById(card));
+  } else {
+    selected = $columns[index].slice(cardIndex).map(card => {
+      return document.getElementById(card);
+    });
+  }
+  console.log(selected);
+  return selected;
+}
 
   /* listeners */
   onMount(() => {
@@ -79,7 +93,7 @@
       },
       ondrop: function(e){
         e.target.classList.remove('drop-active');
-
+        
         let card_id   = e.relatedTarget.id;
         let fromIndex = e.relatedTarget.parentNode.dataset.index;
         let toIndex   = e.target.dataset.index;
@@ -138,36 +152,39 @@
     /* card listener */
     interact('.draggable').draggable({     
       onstart: function(event) {
+        console.log('onstart')
         let card = event.target;
         let index = event.target.parentNode.dataset.index;
-        if ($columns[index].indexOf(card.id) !== $columns[index].length - 1) {
-          console.log("not last card, don't move");
-          return;
-        }
-        event.target.style.zIndex = 10000;        
+
+        // if not last card, get all subsequent cards and move them all
+        let selected = selectCards(card.id, index);
+        selected.forEach(el => {
+          el.style.zIndex = 10000;
+        });
       },
       onmove: function(event) {
-        // dont move if card is not last item in stack
         let card = event.target;
         let index = event.target.parentNode.dataset.index;
-        // console.log($columns[index].indexOf(card.id), $columns[index].length - 1)
-        // if ($columns[index].indexOf(card.id) !== $columns[index].length - 1) {
-        //   console.log("not last card, don't move");
-        //   return;
-        // }
-        let x = (parseFloat(card.getAttribute('data-x')) || 0) + event.dx;
-        let y = (parseFloat(card.getAttribute('data-y')) || 0) + event.dy;
-        card.style.transform = `translate(${x}px, ${y}px)`;
-        card.setAttribute('data-x',x);
-        card.setAttribute('data-y',y);
+
+        let selected = selectCards(card.id, index);
+        selected.forEach(el => {
+          let x = (parseFloat(card.getAttribute('data-x')) || 0) + event.dx;
+          let y = (parseFloat(card.getAttribute('data-y')) || 0) + event.dy;
+          el.style.transform = `translate(${x}px, ${y}px)`;
+          el.setAttribute('data-x',x);
+          el.setAttribute('data-y',y);
+        });
       },        
       onend: function(event) {
         let card = event.target;
-        card.removeAttribute("data-y");
-        card.removeAttribute("data-x");
-        card.removeAttribute("style");
-        console.log(event.type, event.target.id);
-        event.target.style.zIndex = undefined;        
+        let index = event.target.parentNode.dataset.index;
+        let selected = selectCards(card.id, index);
+        selected.forEach(el => {
+          el.removeAttribute("data-y");
+          el.removeAttribute("data-x");
+          el.removeAttribute("style");
+          el.style.zIndex = undefined;
+        });        
       }
     });
   });
