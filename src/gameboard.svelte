@@ -95,7 +95,7 @@
   onMount(() => {
 
     /* free cell */
-    interact('.freecell').dropzone({
+    interact('.cell').dropzone({
       accept: '.draggable',
       ondragenter: function(e) {
         let zone = e.target;
@@ -111,41 +111,26 @@
         let fromIndex = e.relatedTarget.parentNode.dataset.index;
         let toIndex   = e.target.dataset.index;
         let selected  = selectCards(card, fromIndex);
+        let homecell  = e.target.parentNode.classList.contains('homecells');
         if (selected.length > 1) { return; } // don't allow drop if moving more than 1 card
 
-        if ($columns[toIndex].length === 0) {
-          Game.moveCard(fromIndex, toIndex, card);
-        }
-      }
-    });
-
-    /* home cell */
-    interact('.homecell').dropzone({
-      accept: '.draggable',
-      ondragenter: function(e) {
-        let zone = e.target;
-        let index = zone.dataset.index;
-        if ($columns[index].length === 0) zone.classList.add('drop-active');        
-      },
-      ondragleave: function(e) {
-        e.target.classList.remove('drop-active');
-      },
-      ondrop: function(e){
-        e.target.classList.remove('drop-active');
-        let card   = e.relatedTarget.id;
-        let fromIndex = e.relatedTarget.parentNode.dataset.index;
-        let toIndex   = e.target.dataset.index;
-        let selected  = selectCards(card, fromIndex);
-
-        if ($columns[toIndex].length === 0) {
-          // if empty, accept only A
-          if (Game.cardRank(card) === 'A') {
-            Game.moveCard(fromIndex, toIndex, card);
+        // if homecell
+        if (homecell) {
+          if ($columns[toIndex].length === 0) {
+            // if empty, accept only A
+            if (Game.cardRank(card) === 'A') {
+              Game.moveCard(fromIndex, toIndex, card);
+            }
+          } else if ($columns[toIndex].length > 0) {
+            // if not empty, accept only same suit and 1 greater than last card
+            let last_card = $columns[toIndex].slice(-1).pop();
+            if (!Game.alternateColors(card, last_card) && Game.ascendingRank(last_card, card)) {
+              Game.moveCard(fromIndex, toIndex, card);
+            }
           }
-        } else if ($columns[toIndex].length > 0) {
-          // if not empty, accept only same suit and 1 greater than last card
-          let last_card = $columns[toIndex].slice(-1).pop();
-          if (!Game.alternateColors(card, last_card) && Game.ascendingRank(last_card, card)) {
+        } else {
+          // else freecell
+          if ($columns[toIndex].length === 0) {
             Game.moveCard(fromIndex, toIndex, card);
           }
         }
