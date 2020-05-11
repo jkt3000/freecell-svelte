@@ -67,9 +67,8 @@
       return this.findEmptyCell(this.FREECELL_OFFSET);
     },
     findEmptyCell(offset) {
-      for (let i=0; i < 4; i++) {
-        let index = offset + i;
-        if ($columns[index].length == 0) return index;
+      for (let i=offset; i < (4+offset); i++) {
+        if ($columns[i].length == 0) return i;
       }
     },
     numEmptyFreeCells() {
@@ -78,7 +77,15 @@
     },
 
     findValidHomeCell(card) {
-      return;
+      for (let i=this.HOMECELL_OFFSET; i < (this.HOMECELL_OFFSET + 4); i++) {
+        let last_card = $columns[i].slice(-1).pop();
+        if (last_card) {
+          if ((Game.cardSuit(card) === Game.cardSuit(last_card)) && 
+              (Game.ascendingRank(last_card, card))) {
+            return i;
+          }
+        }
+      }
     },
     findValidParent: function(card, index) {
       for (let i=0; i < 8; i++) {
