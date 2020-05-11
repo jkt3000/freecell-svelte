@@ -5,7 +5,7 @@
 
 
 {#if (id != undefined)}
-  <img src='/images/{id}.png' id={id} alt="{id}" class='playing-card' class:draggable>
+  <img src='/images/{id}.png' id={id} class='playing-card' class:draggable alt="{draggable}">
 {/if}
 
 

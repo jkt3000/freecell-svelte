@@ -5,10 +5,12 @@
   export let index;  
   export let type;
   export let draggable = true;
+
+
 </script>
 
 <div class='cell {type}' data-index={index}>
-  {#each cards as card}
+  {#each cards as card, pos}
     <Card id={card} draggable={draggable}/>
   {/each}
 </div>

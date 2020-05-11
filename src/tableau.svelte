@@ -1,16 +1,45 @@
-<script>
+<script context="module">
+  
+  let Game = {
+    ranks: ['A','2','3','4','5','6','7','8','9','T','J','Q','K'],
+    cardRank: function(id) {
+      return id[0];
+    },
+    cardColor: function(id){
+      return (id[1] == 'c' || id[1] == 's') ? 'black' : 'red';
+    },
+    cardSuit: function(id){
+      return id[1];
+    },
+    cardVal: function(id) {
+      return this.ranks.indexOf(id[0]);
+    }
+  }
 
+  function validChild(card, cards) {
+    if (cards.length === 0) {
+      return true; // curr card is last one
+    } else {
+      let list = [...cards];
+      let next_card = list.pop();
+      let this_status = (Game.cardVal(card) === Game.cardVal(next_card) + 1) &&
+      (Game.cardColor(card) !== Game.cardColor(next_card))
+      return validChild(next_card, list) && (this_status);
+    }
+  }
+</script>
+
+<script>
   import Card from './card.svelte';
 
   export let cards = [];
-  export let index;  
-
+  export let index;
 </script>
           
 
 <div class='tableau' data-index={index}>
-  {#each cards as card}
-    <Card id={card}/>
+  {#each cards as card, pos}
+    <Card id={card} draggable={validChild(card, [...cards].slice(pos+1))}/>
   {/each}
 </div>
 

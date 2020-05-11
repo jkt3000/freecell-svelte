@@ -92,7 +92,7 @@
           }
         } else if ($columns[toIndex].length > 0) {
           // if not empty, accept only same suit and 1 greater than last card
-          let last_card = $columns[toIndex][$columns[toIndex].length-1];
+          let last_card = $columns[toIndex].slice(-1).pop();
           if ((Game.cardVal(card_id) == Game.cardVal(last_card) + 1) && 
               (Game.cardSuit(card_id) == Game.cardSuit(last_card))) {
             Game.moveCard(fromIndex, toIndex, card_id);
@@ -124,7 +124,7 @@
             return;
           }
 
-          let last_card = $columns[toIndex][$columns[toIndex].length - 1];
+          let last_card = $columns[toIndex].slice(-1).pop();
           console.log("last card", last_card, "curr card", card_id)          
           // if last card is alternate color and 1 greater than card
           if ((Game.cardColor(last_card) != Game.cardColor(card_id)) && 
@@ -136,12 +136,25 @@
     });
 
     /* card listener */
-    interact('.draggable').draggable({
+    interact('.draggable').draggable({     
       onstart: function(event) {
-        event.target.style.zIndex = 10000;
+        let card = event.target;
+        let index = event.target.parentNode.dataset.index;
+        if ($columns[index].indexOf(card.id) !== $columns[index].length - 1) {
+          console.log("not last card, don't move");
+          return;
+        }
+        event.target.style.zIndex = 10000;        
       },
       onmove: function(event) {
+        // dont move if card is not last item in stack
         let card = event.target;
+        let index = event.target.parentNode.dataset.index;
+        // console.log($columns[index].indexOf(card.id), $columns[index].length - 1)
+        // if ($columns[index].indexOf(card.id) !== $columns[index].length - 1) {
+        //   console.log("not last card, don't move");
+        //   return;
+        // }
         let x = (parseFloat(card.getAttribute('data-x')) || 0) + event.dx;
         let y = (parseFloat(card.getAttribute('data-y')) || 0) + event.dy;
         card.style.transform = `translate(${x}px, ${y}px)`;
@@ -168,6 +181,7 @@
 
 <main>
   <div class='container-fluid'>
+    <h1>{gameId}</h1>
     <div class='row headboard'>    
       <div class='cells-board homecells'>
         {#each Array(4) as _, index}
