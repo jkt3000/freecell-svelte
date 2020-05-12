@@ -84,41 +84,36 @@
         return true;
       }
     },
-
-    validHomeCellMove(fromIndex, toIndex, cards) {
-      // no if more than 1 card
+    validCellMove(fromIndex, toIndex, cards) {
       if (cards.length > 1) { return; }
 
-      let card = cards[0];
-      // if empty, only an A
-      if ($columns[toIndex].length === 0) {
-        return Game.cardRank(card) === 'A';
-      }
+      if (toIndex < Game.FREECELL_OFFSET) {
+        // HomeCell        
+        let card = cards[0];
+        // if empty, only an A
+        if ($columns[toIndex].length === 0) {
+          return Game.cardRank(card) === 'A';
+        }
 
-      // if not empty, only if card is same suit and +1 to last card in stack
-      let parent = $columns[toIndex].slice(-1).pop();
-      if ((Game.cardSuit(parent) === Game.cardSuit(card)) && 
-          (Game.ascendingRank(parent, card))) {
-        return true;
+        // if not empty, only if card is same suit and +1 to last card in stack
+        let parent = $columns[toIndex].slice(-1).pop();
+        if ((Game.cardSuit(parent) === Game.cardSuit(card)) && 
+            (Game.ascendingRank(parent, card))) {
+          return true;
+        }
+      } else {
+        // FreeCell
+        return ($columns[toIndex].length === 0); 
       }
     },
 
-    validFreeCellMove(fromIndex, toIndex, cards) {
-      // no if more than 1 card
-      if (cards.length > 1) { return; }
-
-      // yes if stack is empty
-      if ($columns[toIndex].length === 0) { return true; }
-    },
     // move cards if last card in toIndex is alternate color, +1 to first card in cards
     moveCards(fromIndex, toIndex, cards, record = true) {
       cards.forEach(card => {
         $columns[fromIndex] = this.removeCard($columns[fromIndex], card);
         $columns[toIndex]   = this.addCard($columns[toIndex], card);
       });
-      if (record) {
-        this.recordMove(fromIndex, toIndex, cards);
-      }
+      if (record) { this.recordMove(fromIndex, toIndex, cards); }
     },
 
     alternateColors(c1, c2) { 
@@ -242,19 +237,19 @@
     } else {
       return cards.slice(cardIndex);
     }
-  }
+  };
 
 
   /* listeners */
   onMount(() => {
 
-    /* free cell */
+    //
+    // drop on Cell
+    //
     interact('.cell').dropzone({
       accept: '.draggable',
       ondragenter: function(e) {
-        let zone = e.target;
-        let index = zone.dataset.index;
-        if ($columns[index].length == 0) zone.classList.add('drop-active');  
+        e.target.classList.add('drop-active');  
       },
       ondragleave: function(e) {
         e.target.classList.remove('drop-active');
@@ -265,21 +260,16 @@
         let fromIndex = e.relatedTarget.parentNode.dataset.index;
         let toIndex   = e.target.dataset.index;
         let cards     = selectCards(card, fromIndex);
-        let homecell  = e.target.parentNode.classList.contains('homecells');
 
-        if (homecell) {
-          if (Game.validHomeCellMove(fromIndex, toIndex, cards)) {
-            Game.moveCards(fromIndex, toIndex, cards);
-          }
-        } else {
-          if (Game.validFreeCellMove(fromIndex, toIndex, cards)) {
-            Game.moveCards(fromIndex, toIndex, cards);
-          }
+        if (Game.validCellMove(fromIndex, toIndex, cards)) {
+          Game.moveCards(fromIndex, toIndex, cards);
         }
       }
     });
 
-    /* tableau */
+    //
+    // drop on Tableau
+    //
     interact('.tableau').dropzone({
       accept: '.draggable',
       listeners: {
@@ -297,25 +287,23 @@
       }
     });
 
-    /* card listener */
+    //
+    // action on draggable card
+    //
     interact('.draggable').draggable({     
       onstart: function(event) {
-        console.log('onstart')
-        let el = event.target;
+        let card  = event.target.id;
         let index = event.target.parentNode.dataset.index;
-
-        // if not last card, get all subsequent cards and move them all
-        let selected = selectCards(el.id, index);
+        let cards = selectCards(card, index);
         selected.forEach(card => {
           let el = document.getElementById(card);
-          el.style.zIndex = 10000
+          el.style.zIndex = 10000;
         });
       },
       onmove: function(event) {
-        let el = event.target;
+        let card  = event.target.id;
         let index = event.target.parentNode.dataset.index;
-
-        let selected = selectCards(el.id, index);
+        let cards = selectCards(card, index);
         selected.forEach(card => {
           let el = document.getElementById(card);
           let x = (parseFloat(el.getAttribute('data-x')) || 0) + event.dx;
@@ -326,9 +314,9 @@
         });
       },        
       onend: function(event) {
-        let el = event.target;
+        let card  = event.target.id;
         let index = event.target.parentNode.dataset.index;
-        let selected = selectCards(el.id, index);
+        let cards = selectCards(card, index);
         selected.forEach(card => {
           let el = document.getElementById(card);          
           el.removeAttribute("data-y");
@@ -339,14 +327,19 @@
       }      
     });
 
+
+    // 
+    // tap action on last card
+    //
     interact('.draggable').on('tap', function(event){
-      let el = event.target;
-      let card = event.target.id;
+      let card  = event.target.id;
       let index = event.target.parentNode.dataset.index;
       let selected = selectCards(card, index);
       if (selected.length > 1) return;
 
-      console.log(`Autocomplete action for ${card}`)
+      console.log(`Autocomplete action for ${card}`);
+
+      // move A to home
       if (Game.cardRank(card) === 'A') {
         let toIndex = Game.findEmptyHomeCell();
         if (toIndex >= 0) {
@@ -356,17 +349,14 @@
         }
       }
 
+      // find next viable spot
       let toIndex = Game.findValidHomeCell(card) || Game.findValidParent(card) || Game.findEmptyFreeCell();
-      // find valid next homecell spot
       if (toIndex > 0) {
-        // if viable parent in tableau, move to that spot
         Game.moveCards(index, toIndex, [card]);
       } else {
-        // no valid move found
         console.log("No valid move found");
-      }
-  
-    })
+      }  
+    });
   });
 
   /* start up a new game */
