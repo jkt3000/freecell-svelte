@@ -1,38 +1,48 @@
-<script type="text/javascript">
-  function startGame() {
-    console.log("Starting game clicked");
-    alert('start game')
+<script>
+  import { createEventDispatcher } from 'svelte';
+
+  export let disableUndo = false;
+
+
+  const dispatch = createEventDispatcher();
+  function undo() {
+    dispatch('command', {command: 'undo'});
   };
 
-  function undoMove() {
-    alert('Undo last move') 
+  function newGame() {
+    dispatch('command', {command: 'newgame'});
   };
 
-  function getHint(){};
+  function hint() {
+    dispatch('command', {command: 'hint'});
+  };
 
-  function setGameSettings() {};
+  function settings() {
+    dispatch('command', {command: 'settings'});
+  };
+
 </script>
       
 
 <nav class="navbar fixed-bottom navbar-dark bg-dark p-0">
   <ul class="nav justify-content-around" style='width:100%'>
     <li class="nav-item">
-      <a class="nav-link text-white" href="#" on:click|preventDefault={undoMove}>
+      <a class="nav-link btn btn-link text-white" href="#" class:disabled={disableUndo} on:click|preventDefault={undo}>
         <i class="fas fa-undo"></i>
       </a>
     </li>
     <li class="nav-item">
-      <a class="nav-link text-white" href="#" on:click|preventDefault={startGame}>
+      <a class="nav-link btn btn-link text-white" href="#" on:click|preventDefault={newGame}>
         <i class="fas fa-plus"></i>
       </a>
     </li>
     <li class="nav-item">
-      <a class="nav-link text-white" href="#" on:click|preventDefault={getHint}>
+      <a class="nav-link btn btn-link text-white" href="#" on:click|preventDefault={hint}>
         <i class="far fa-lightbulb"></i>
       </a>
     </li>
     <li class="nav-item">
-      <a class="nav-link text-white" href="#" on:click|preventDefault={setGameSettings}>
+      <a class="nav-link btn btn-link text-white" href="#" on:click|preventDefault={settings}>
         <i class="fas fa-cog"></i>
       </a>
     </li>
