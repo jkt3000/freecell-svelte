@@ -46,11 +46,29 @@
     addCard(list, card) { 
       return list.concat(card); 
     },
-    moveCard(fromIndex, toIndex, card, recordMove = true) {
+    moveCard(fromIndex, toIndex, card, record = true) {
       $columns[fromIndex] = this.removeCard($columns[fromIndex], card);
       $columns[toIndex]   = this.addCard($columns[toIndex], card);
-      if (recordMove) {
+      if (record) {
         this.recordMove(fromIndex, toIndex, card);
+      }
+    },
+    // move cards if last card in toIndex is alternate color, +1 to first card in cards
+    moveCards(fromIndex, toIndex, cards, record = true) {
+      let parent = $columns[toIndex][$columns[toIndex].length-1];
+      let card   = cards[0];
+      if (Game.alternateColors(parent, card) && Game.descendingRank(parent, card)) {
+        this._moveCards(fromIndex, toIndex, cards, record);
+      }
+    },
+
+    _moveCards(fromIndex, toIndex, cards, record = true) {
+      cards.forEach(card => {
+        $columns[fromIndex] = this.removeCard($columns[fromIndex], card);
+        $columns[toIndex]   = this.addCard($columns[toIndex], card);
+      });
+      if (record) {
+        this.recordMove(fromIndex, toIndex, cards);
       }
     },
     alternateColors(c1, c2) { 
@@ -113,7 +131,7 @@
       let record = historyLogs.pop();
       if (!record) return;
       console.log("Undo last move", record);
-      Game.moveCard(record.to, record.from, record.cards, false);
+      Game._moveCards(record.to, record.from, record.cards, false);
       // need to swap from <-> to and reverse order of cards moved
     },
 
@@ -231,35 +249,33 @@
     interact('.tableau').dropzone({
       accept: '.draggable',
       listeners: {
-        dragenter (e) { 
-          e.target.classList.add('drop-active');  
-        },
-        dragleave (e) { 
-          e.target.classList.remove('drop-active');  
-        },
         drop (e) {
-          e.target.classList.remove('drop-active');  
           let card      = e.relatedTarget.id;
           let fromIndex = e.relatedTarget.parentNode.dataset.index;
           let toIndex   = e.target.dataset.index;
-
+          console.log(`Card ${card} was dropped on column ${toIndex}`);
           //if card is dropped on same column, do nothing
           if (fromIndex === toIndex ) { return; }
 
           // only allow if # of empty freecells >= selected count
-          let selected = selectCards(card, fromIndex);
-          if (selected.length - 1 > Game.numEmptyFreeCells()) {
-            console.log("Not enough empty slots to make move", Game.numEmptyFreeCells());
-            console.log(`Need ${selected.length-1} spaces, only have ${Game.numEmptyFreeCells()}`);
+          let cards = selectCards(card, fromIndex);
+          let free_moves = Game.numEmptyFreeCells();
+          if (cards.length - 1 > free_moves) {
+            console.log(`Not enough empty freecells: Need ${cards.length-1} spaces, only have ${free_moves}`);
             return;
           }
 
-          let last_card = $columns[toIndex].slice(-1).pop();
-          console.log("last card", last_card, "curr card", card)          
-          // if last card is alternate color and 1 greater than card
-          if (Game.alternateColors(last_card, card) && Game.descendingRank(last_card, card)) {
-            selected.forEach(el => Game.moveCard(fromIndex, toIndex, el.id));
-          }
+          console.log("[moveCards]", cards)
+          let card_ids = cards.map(c => { return c.id});
+          console.log(card_ids)
+          Game.moveCards(fromIndex, toIndex, card_ids);
+
+          // let last_card = $columns[toIndex].slice(-1).pop();
+          // console.log("last card", last_card, "curr card", card)          
+          // // if last card is alternate color and 1 greater than card
+          // if (Game.alternateColors(last_card, card) && Game.descendingRank(last_card, card)) {
+          //   selected.forEach(el => Game.moveCard(fromIndex, toIndex, el.id));
+          // }
         } 
       }
     });
