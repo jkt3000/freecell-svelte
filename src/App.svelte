@@ -6,7 +6,7 @@
   import Tableau from './tableau.svelte';
   import Footer from './footer.svelte';
 
-  import {columns, history, moves} from './stores.js'; /* data store */
+  import {columns, history, moves, settings} from './stores.js'; /* data store */
   
   const Game = {
     HOMECELL_OFFSET: 8,
@@ -80,6 +80,7 @@
         return true;
       }
     },
+
     validCellMove(fromIndex, toIndex, cards) {
       if (cards.length > 1) { return; }
 
@@ -140,7 +141,6 @@
       let freecells = $columns.slice(this.FREECELL_OFFSET);
       return freecells.filter(c => { return (c.length === 0); }).length;
     },
-
     findValidHomeCell(card) {
       for (let i=this.HOMECELL_OFFSET; i < (this.HOMECELL_OFFSET + 4); i++) {
         let last_card = $columns[i].slice(-1).pop();
@@ -171,7 +171,7 @@
 
     undo() {
       let record = $history.pop();
-      $history = $history; 
+      $history = $history;
       if (!record) return;
       console.log("Undo last move", record);
       Game.moveCards(record.to, record.from, record.cards, false);
@@ -185,14 +185,7 @@
         this.shuffle();
       }
 
-      pop() {
-        if (this.empty) {
-          return;
-        } else {
-          return this.cards.pop();
-        }
-      }
-
+      // MS random shuffle for FreeCell https://rosettacode.org/wiki/Deal_cards_for_FreeCell
       shuffle() {
         if (!this.empty) { return; }
         let deck = Array.from(Game.PLAYING_CARDS, function(id) { return id });
@@ -210,22 +203,16 @@
         let tableaus = [ [],[],[],[], [],[],[],[] ];
         let i = 0;
         while (!this.empty) {
-          tableaus[i++ % tableaus.length].unshift(this.pop());
+          tableaus[i++ % tableaus.length].unshift(this.cards.pop());
         }
         return tableaus;
       }
 
-      get remaining() {
-        return this.cards.length;
-      }
-
-      get empty() {
-        return this.cards.length == 0;
-      }
+      get empty() { return this.cards.length === 0; }
     }
   };
 
-  /* listeners */
+  /* listeners for cards/cells */
   onMount(() => {
 
     //
@@ -396,11 +383,9 @@
     }
   };
 
-  /* start up a new game */
+  /* init settings for new game */
   let gameId;
-  let runTime    = 0;
-  $: disableUndo = ($history.length === 0);
-  $: moveCount = $moves;
+  let runTime = 0;
 </script>
 
 
@@ -434,7 +419,7 @@
   </div>
 </div>
 
-<Footer disableUndo={disableUndo} on:command={handleAction}/>
+<Footer disableUndo={($history.length === 0)} on:command={handleAction}/>
 
 
 <style type="text/scss">
