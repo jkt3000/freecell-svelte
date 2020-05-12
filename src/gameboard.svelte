@@ -5,10 +5,13 @@
   import GameCell from './gamecell.svelte';
   import Tableau from './tableau.svelte';
 
-  import {columns} from './stores.js'; /* data store */
+  import {columns, history} from './stores.js'; /* data store */
   
   export let gameId = parseInt((Math.random() * 1000000), 10);
 
+  let historyLogs;
+  let unsubHistory = history.subscribe(logs => historyLogs = logs);
+  console.log(`history`, historyLogs)
 
   const Game = {
     HOMECELL_OFFSET: 8,
@@ -43,10 +46,76 @@
     addCard(list, card) { 
       return list.concat(card); 
     },
-    moveCard(fromIndex, toIndex, card) {
+    moveCard(fromIndex, toIndex, card, record = true) {
       $columns[fromIndex] = this.removeCard($columns[fromIndex], card);
       $columns[toIndex]   = this.addCard($columns[toIndex], card);
+      if (record) {
+        this.recordMove(fromIndex, toIndex, card);
+      }
     },
+
+    // returns true if move from one column to other is valid.
+    // if toIndex is homecell -> homecell logic
+    // if toIndex is freecell -> only if free and single card
+    // if toIndex is tableaux -> only if first card of cards is alternate and last card is 1+ than card
+    validTableauMove(fromIndex, toIndex, cards) {
+      console.log("tableau logic");      
+      if (fromIndex === toIndex) { 
+        console.log("Can't move to same column."); 
+        return; 
+      }
+
+      // only allow if # of empty freecells >= selected count
+      let free_moves = Game.numEmptyFreeCells();
+      if (cards.length - 1 > free_moves) {
+        console.log(`Not enough empty freecells: Need ${cards.length-1} spaces, only have ${free_moves}`);
+        return;
+      }
+
+      // ok if parent is blank
+      if ($columns[toIndex].length === 0) {
+        return true;
+      }
+
+      // check parent vs first card in cards
+      let card = cards[0];
+      let parent = $columns[toIndex].slice(-1).pop();
+      if (Game.alternateColors(parent, card) && Game.descendingRank(parent, card)) {
+        return true;
+      }
+    },
+    validCellMove(fromIndex, toIndex, cards) {
+      if (cards.length > 1) { return; }
+
+      if (toIndex < Game.FREECELL_OFFSET) {
+        // HomeCell        
+        let card = cards[0];
+        // if empty, only an A
+        if ($columns[toIndex].length === 0) {
+          return Game.cardRank(card) === 'A';
+        }
+
+        // if not empty, only if card is same suit and +1 to last card in stack
+        let parent = $columns[toIndex].slice(-1).pop();
+        if ((Game.cardSuit(parent) === Game.cardSuit(card)) && 
+            (Game.ascendingRank(parent, card))) {
+          return true;
+        }
+      } else {
+        // FreeCell
+        return ($columns[toIndex].length === 0); 
+      }
+    },
+
+    // move cards if last card in toIndex is alternate color, +1 to first card in cards
+    moveCards(fromIndex, toIndex, cards, record = true) {
+      cards.forEach(card => {
+        $columns[fromIndex] = this.removeCard($columns[fromIndex], card);
+        $columns[toIndex]   = this.addCard($columns[toIndex], card);
+      });
+      if (record) { this.recordMove(fromIndex, toIndex, cards); }
+    },
+
     alternateColors(c1, c2) { 
       return (this.cardColor(c1) !== this.cardColor(c2));
     },
@@ -87,13 +156,30 @@
         }
       }
     },
-    findValidParent: function(card, index) {
+    findValidParent(card, index) {
       for (let i=0; i < 8; i++) {
         if (i === index) continue;
         let parent = [...$columns[i]].slice(-1).pop();
         if (Game.validParent(parent, card)) return i;
       }
     },
+
+    // record moves made to be undone
+    // { from: 0..15, to: 0..15, cards: ['Ac', '6c' ]}
+    recordMove(fromIndex, toIndex, cards) {
+      let record = { from: fromIndex, to: toIndex, cards: cards }
+      historyLogs.push(record);
+      console.log(`[move:${historyLogs.length}]`,record);
+    },
+
+    undo() {
+      let record = historyLogs.pop();
+      if (!record) return;
+      console.log("Undo last move", record);
+      Game.moveCards(record.to, record.from, record.cards, false);
+      // need to swap from <-> to and reverse order of cards moved
+    },
+
     Deck: class {
       // generates a new random deck based on unique game_id
       constructor(seed) {
@@ -144,30 +230,26 @@
 
   /* returns array of selected cards for dragging */
   function selectCards(card, index) {
-    let selected = [];
     let cards = $columns[index];
     let cardIndex = cards.indexOf(card);
     if (cardIndex + 1 === cards.length) {
-      selected.push(document.getElementById(card));
+      return [card];
     } else {
-      selected = cards.slice(cardIndex).map(id => {
-        return document.getElementById(id);
-      });
+      return cards.slice(cardIndex);
     }
-    return selected;
-  }
+  };
 
 
   /* listeners */
   onMount(() => {
 
-    /* free cell */
+    //
+    // drop on Cell
+    //
     interact('.cell').dropzone({
       accept: '.draggable',
       ondragenter: function(e) {
-        let zone = e.target;
-        let index = zone.dataset.index;
-        if ($columns[index].length == 0) zone.classList.add('drop-active');  
+        e.target.classList.add('drop-active');  
       },
       ondragleave: function(e) {
         e.target.classList.remove('drop-active');
@@ -177,87 +259,53 @@
         let card      = e.relatedTarget.id;
         let fromIndex = e.relatedTarget.parentNode.dataset.index;
         let toIndex   = e.target.dataset.index;
-        let selected  = selectCards(card, fromIndex);
-        let homecell  = e.target.parentNode.classList.contains('homecells');
-        if (selected.length > 1) { return; } // don't allow drop if moving more than 1 card
+        let cards     = selectCards(card, fromIndex);
 
-        // if homecell
-        if (homecell) {
-          if ($columns[toIndex].length === 0) {
-            // if empty, accept only A
-            if (Game.cardRank(card) === 'A') {
-              Game.moveCard(fromIndex, toIndex, card);
-            }
-          } else if ($columns[toIndex].length > 0) {
-            // if not empty, accept only same suit and 1 greater than last card
-            let last_card = $columns[toIndex].slice(-1).pop();
-            if (!Game.alternateColors(card, last_card) && Game.ascendingRank(last_card, card)) {
-              Game.moveCard(fromIndex, toIndex, card);
-            }
-          }
-        } else {
-          // else freecell
-          if ($columns[toIndex].length === 0) {
-            Game.moveCard(fromIndex, toIndex, card);
-          }
+        if (Game.validCellMove(fromIndex, toIndex, cards)) {
+          Game.moveCards(fromIndex, toIndex, cards);
         }
       }
     });
 
-    /* tableau */
+    //
+    // drop on Tableau
+    //
     interact('.tableau').dropzone({
       accept: '.draggable',
       listeners: {
-        dragenter (e) { 
-          e.target.classList.add('drop-active');  
-        },
-        dragleave (e) { 
-          e.target.classList.remove('drop-active');  
-        },
         drop (e) {
-          e.target.classList.remove('drop-active');  
           let card      = e.relatedTarget.id;
           let fromIndex = e.relatedTarget.parentNode.dataset.index;
           let toIndex   = e.target.dataset.index;
+          let cards     = selectCards(card, fromIndex);
+          console.log(`[Move] ${cards} from ${fromIndex} => ${toIndex}`);
 
-          //if card is dropped on same column, do nothing
-          if (fromIndex === toIndex ) { return; }
-
-          // only allow if # of empty freecells >= selected count
-          let selected = selectCards(card, fromIndex);
-          if (selected.length - 1 > Game.numEmptyFreeCells()) {
-            console.log("Not enough empty slots to make move", Game.numEmptyFreeCells());
-            console.log(`Need ${selected.length-1} spaces, only have ${Game.numEmptyFreeCells()}`);
-            return;
-          }
-
-          let last_card = $columns[toIndex].slice(-1).pop();
-          console.log("last card", last_card, "curr card", card)          
-          // if last card is alternate color and 1 greater than card
-          if (Game.alternateColors(last_card, card) && Game.descendingRank(last_card, card)) {
-            selected.forEach(el => Game.moveCard(fromIndex, toIndex, el.id));
+          if (Game.validTableauMove(fromIndex, toIndex, cards)) {
+            Game.moveCards(fromIndex, toIndex, cards);
           }
         } 
       }
     });
 
-    /* card listener */
+    //
+    // action on draggable card
+    //
     interact('.draggable').draggable({     
       onstart: function(event) {
-        console.log('onstart')
-        let el = event.target;
+        let card  = event.target.id;
         let index = event.target.parentNode.dataset.index;
-
-        // if not last card, get all subsequent cards and move them all
-        let selected = selectCards(el.id, index);
-        selected.forEach(el => el.style.zIndex = 10000);
+        let cards = selectCards(card, index);
+        selected.forEach(card => {
+          let el = document.getElementById(card);
+          el.style.zIndex = 10000;
+        });
       },
       onmove: function(event) {
-        let el = event.target;
+        let card  = event.target.id;
         let index = event.target.parentNode.dataset.index;
-
-        let selected = selectCards(el.id, index);
-        selected.forEach(el => {
+        let cards = selectCards(card, index);
+        selected.forEach(card => {
+          let el = document.getElementById(card);
           let x = (parseFloat(el.getAttribute('data-x')) || 0) + event.dx;
           let y = (parseFloat(el.getAttribute('data-y')) || 0) + event.dy;
           el.style.transform = `translate(${x}px, ${y}px)`;
@@ -266,10 +314,11 @@
         });
       },        
       onend: function(event) {
-        let el = event.target;
+        let card  = event.target.id;
         let index = event.target.parentNode.dataset.index;
-        let selected = selectCards(el.id, index);
-        selected.forEach(el => {
+        let cards = selectCards(card, index);
+        selected.forEach(card => {
+          let el = document.getElementById(card);          
           el.removeAttribute("data-y");
           el.removeAttribute("data-x");
           el.removeAttribute("style");
@@ -278,33 +327,36 @@
       }      
     });
 
+
+    // 
+    // tap action on last card
+    //
     interact('.draggable').on('tap', function(event){
-      let el = event.target;
+      let card  = event.target.id;
       let index = event.target.parentNode.dataset.index;
-      let selected = selectCards(el.id, index);
+      let selected = selectCards(card, index);
       if (selected.length > 1) return;
 
-      console.log(`Autocomplete action for ${el.id}`)
-      if (Game.cardRank(el.id) === 'A') {
+      console.log(`Autocomplete action for ${card}`);
+
+      // move A to home
+      if (Game.cardRank(card) === 'A') {
         let toIndex = Game.findEmptyHomeCell();
         if (toIndex >= 0) {
           console.log("moving card to empty homecell")
-          Game.moveCard(index, toIndex, el.id);
+          Game.moveCards(index, toIndex, [card]);
           return;
         }
       }
 
-      let toIndex = Game.findValidHomeCell(el.id) || Game.findValidParent(el.id) || Game.findEmptyFreeCell();
-      // find valid next homecell spot
+      // find next viable spot
+      let toIndex = Game.findValidHomeCell(card) || Game.findValidParent(card) || Game.findEmptyFreeCell();
       if (toIndex > 0) {
-        // if viable parent in tableau, move to that spot
-        Game.moveCard(index, toIndex, el.id);
+        Game.moveCards(index, toIndex, [card]);
       } else {
-        // no valid move found
         console.log("No valid move found");
-      }
-  
-    })
+      }  
+    });
   });
 
   /* start up a new game */
@@ -316,7 +368,13 @@
 
 <main>
   <div class='container-fluid'>
-    <h1>{gameId}</h1>
+    <div class='row'>
+      <div class='col-12'>
+        <h3>{gameId}</h3>
+        <button class='btn btn-primary' on:click={Game.undo}><i class="fas fa-undo"></i></button>
+      </div>
+    </div>
+
     <div class='row headboard'>    
       <div class='cells-board homecells'>
         {#each Array(4) as _, index}
