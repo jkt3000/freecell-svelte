@@ -6,17 +6,8 @@
   import Tableau from './tableau.svelte';
   import Footer from './footer.svelte';
 
-  import {columns, history} from './stores.js'; /* data store */
+  import {columns, history, moves} from './stores.js'; /* data store */
   
-  export let gameId = parseInt((Math.random() * 1000000), 10);
-
-  let runTime = 0;
-  let movesCount = 0;
-  let historyLogs;
-  let unsubHistory = history.subscribe(logs => historyLogs = logs);
-  console.log(`history`, historyLogs)
-  $: disableUndo = historyLogs.length;
-
   const Game = {
     HOMECELL_OFFSET: 8,
     FREECELL_OFFSET: 12,
@@ -56,6 +47,7 @@
       if (record) {
         this.recordMove(fromIndex, toIndex, card);
       }
+      $moves = $moves + 1;
     },
 
     // returns true if move from one column to other is valid.
@@ -172,16 +164,17 @@
     // { from: 0..15, to: 0..15, cards: ['Ac', '6c' ]}
     recordMove(fromIndex, toIndex, cards) {
       let record = { from: fromIndex, to: toIndex, cards: cards }
-      historyLogs.push(record);
-      console.log(`[move:${historyLogs.length}]`,record);
+      $history = [...$history, record];
+      $moves = $moves + 1;
+      console.log(`[move:${$history.length}]`,record);
     },
 
     undo() {
-      let record = historyLogs.pop();
+      let record = $history.pop();
+      $history = $history; 
       if (!record) return;
       console.log("Undo last move", record);
       Game.moveCards(record.to, record.from, record.cards, false);
-      // need to swap from <-> to and reverse order of cards moved
     },
 
     Deck: class {
@@ -231,18 +224,6 @@
       }
     }
   };
-
-  /* returns array of selected cards for dragging */
-  function selectCards(card, index) {
-    let cards = $columns[index];
-    let cardIndex = cards.indexOf(card);
-    if (cardIndex + 1 === cards.length) {
-      return [card];
-    } else {
-      return cards.slice(cardIndex);
-    }
-  };
-
 
   /* listeners */
   onMount(() => {
@@ -363,47 +344,77 @@
     });
   });
 
-  /* start up a new game */
-  let deck  = new Game.Deck(gameId);
-  let cards = deck.toTableau();
-  $columns  = cards.concat([[],[],[],[],[],[],[],[]]);
 	// app deals with handling game options, starting new game, etc.
 	// Gameboard handles running the actual game
 
-  function startGame() {
-    console.log("Starting game clicked");
-    alert('start game')
+  /* returns array of selected cards for dragging */
+  function selectCards(card, index) {
+    let cards = $columns[index];
+    let cardIndex = cards.indexOf(card);
+    if (cardIndex + 1 === cards.length) {
+      return [card];
+    } else {
+      return cards.slice(cardIndex);
+    }
   };
 
-  function undoMove() {
-    Game.undo();
-    alert('Undo last move') 
+  function startGame(id) {
+    console.log("Start new game with id ", id);
+    gameId = id || parseInt((Math.random() * 1000000), 10);
+    let deck = new Game.Deck(gameId);
+    let cards = deck.toTableau();
+    $history = [];
+    $columns = cards.concat([[],[],[],[],[],[],[],[]]);
+    $moves = 0;
   };
 
   function getHint(){};
 
   function setGameSettings() {};
+
+
+  function handleAction(event) {
+    let command = event.detail.command;
+    switch(command) {
+      case 'undo':
+        Game.undo();
+        break;
+      case 'settings':
+        console.log("change settings");
+        break;
+      case 'newgame':
+        let gameId = event.detail.gameId;
+        startGame(gameId);
+        break;
+      case 'restart':
+        console.log("Restart same game");
+        break;
+      case 'hint':
+        console.log("Hint for next move");
+        break;
+      default:
+    }
+  };
+
+  /* start up a new game */
+  let gameId;
+  let runTime    = 0;
+  $: disableUndo = ($history.length === 0);
+  $: moveCount = $moves;
 </script>
 
 
 <nav class="navbar navbar-dark bg-dark m-0 p-0 pl-1 pr-1 d-flex justify-content-between align-content-center">
   <a class="navbar-brand" href="/"><span class='text-danger' style='font-size: 30px; line-height:1em; margin:0;padding:0;'>♥️</span></a>
-  {#if (gameId)}
-    <span class='navbar-brand'>{gameId}</span>
+  {#if gameId !== undefined}
+    <span class='navbar-brand'>Game: {gameId}</span>
   {/if}
   <span class='navbar-brand'>{runTime}</span>
-  <span class='navbar-brand'>Moves: {movesCount}</span>
+  <span class='navbar-brand'>Moves: {$moves}</span>
 </nav>
 
 
 <div class='container-fluid' id='gameboard'>
-  <div class='row'>
-    <div class='col-12'>
-      <h3>{gameId}</h3>
-      <button class='btn btn-primary' on:click={Game.undo}><i class="fas fa-undo"></i></button>
-    </div>
-  </div>
-
   <div class='row headboard'>    
     <div class='cells-board homecells'>
       {#each Array(4) as _, index}
@@ -423,7 +434,7 @@
   </div>
 </div>
 
-<Footer disableUndo={disableUndo}/>
+<Footer disableUndo={disableUndo} on:command={handleAction}/>
 
 
 <style type="text/scss">
