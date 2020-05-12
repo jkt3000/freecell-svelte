@@ -5,10 +5,13 @@
   import GameCell from './gamecell.svelte';
   import Tableau from './tableau.svelte';
 
-  import {columns} from './stores.js'; /* data store */
+  import {columns, history} from './stores.js'; /* data store */
   
   export let gameId = parseInt((Math.random() * 1000000), 10);
 
+  let historyLogs;
+  let unsubHistory = history.subscribe(logs => historyLogs = logs);
+  console.log(`history`, historyLogs)
 
   const Game = {
     HOMECELL_OFFSET: 8,
@@ -43,9 +46,12 @@
     addCard(list, card) { 
       return list.concat(card); 
     },
-    moveCard(fromIndex, toIndex, card) {
+    moveCard(fromIndex, toIndex, card, recordMove = true) {
       $columns[fromIndex] = this.removeCard($columns[fromIndex], card);
       $columns[toIndex]   = this.addCard($columns[toIndex], card);
+      if (recordMove) {
+        this.recordMove(fromIndex, toIndex, card);
+      }
     },
     alternateColors(c1, c2) { 
       return (this.cardColor(c1) !== this.cardColor(c2));
@@ -87,13 +93,30 @@
         }
       }
     },
-    findValidParent: function(card, index) {
+    findValidParent(card, index) {
       for (let i=0; i < 8; i++) {
         if (i === index) continue;
         let parent = [...$columns[i]].slice(-1).pop();
         if (Game.validParent(parent, card)) return i;
       }
     },
+
+    // record moves made to be undone
+    // { from: 0..15, to: 0..15, cards: ['Ac', '6c' ]}
+    recordMove(fromIndex, toIndex, cards) {
+      let record = { from: fromIndex, to: toIndex, cards: cards }
+      historyLogs.push(record);
+      console.log(`[move:${historyLogs.length}]`,record);
+    },
+
+    undo() {
+      let record = historyLogs.pop();
+      if (!record) return;
+      console.log("Undo last move", record);
+      Game.moveCard(record.to, record.from, record.cards, false);
+      // need to swap from <-> to and reverse order of cards moved
+    },
+
     Deck: class {
       // generates a new random deck based on unique game_id
       constructor(seed) {
@@ -316,7 +339,13 @@
 
 <main>
   <div class='container-fluid'>
-    <h1>{gameId}</h1>
+    <div class='row'>
+      <div class='col-12'>
+        <h3>{gameId}</h3>
+        <button class='btn btn-primary' on:click={Game.undo}><i class="fas fa-undo"></i></button>
+      </div>
+    </div>
+
     <div class='row headboard'>    
       <div class='cells-board homecells'>
         {#each Array(4) as _, index}
