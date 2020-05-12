@@ -295,7 +295,7 @@
         let card  = event.target.id;
         let index = event.target.parentNode.dataset.index;
         let cards = selectCards(card, index);
-        selected.forEach(card => {
+        cards.forEach(card => {
           let el = document.getElementById(card);
           el.style.zIndex = 10000;
         });
@@ -304,7 +304,7 @@
         let card  = event.target.id;
         let index = event.target.parentNode.dataset.index;
         let cards = selectCards(card, index);
-        selected.forEach(card => {
+        cards.forEach(card => {
           let el = document.getElementById(card);
           let x = (parseFloat(el.getAttribute('data-x')) || 0) + event.dx;
           let y = (parseFloat(el.getAttribute('data-y')) || 0) + event.dy;
@@ -317,7 +317,7 @@
         let card  = event.target.id;
         let index = event.target.parentNode.dataset.index;
         let cards = selectCards(card, index);
-        selected.forEach(card => {
+        cards.forEach(card => {
           let el = document.getElementById(card);          
           el.removeAttribute("data-y");
           el.removeAttribute("data-x");
@@ -334,8 +334,8 @@
     interact('.draggable').on('tap', function(event){
       let card  = event.target.id;
       let index = event.target.parentNode.dataset.index;
-      let selected = selectCards(card, index);
-      if (selected.length > 1) return;
+      let cards = selectCards(card, index);
+      if (cards.length > 1) return;
 
       console.log(`Autocomplete action for ${card}`);
 
@@ -366,34 +366,32 @@
 </script>
 
 
-<main>
-  <div class='container-fluid'>
-    <div class='row'>
-      <div class='col-12'>
-        <h3>{gameId}</h3>
-        <button class='btn btn-primary' on:click={Game.undo}><i class="fas fa-undo"></i></button>
-      </div>
+<div class='container-fluid' id='gameboard'>
+  <div class='row'>
+    <div class='col-12'>
+      <h3>{gameId}</h3>
+      <button class='btn btn-primary' on:click={Game.undo}><i class="fas fa-undo"></i></button>
     </div>
+  </div>
 
-    <div class='row headboard'>    
-      <div class='cells-board homecells'>
-        {#each Array(4) as _, index}
-          <GameCell cards={$columns[index + Game.HOMECELL_OFFSET]} index={index + Game.HOMECELL_OFFSET}  type='homecell' draggable={false}/>
-        {/each}
-      </div>
-      <div class='cells-board freecells'>
-        {#each Array(4) as _, index}
-          <GameCell cards={$columns[index + Game.FREECELL_OFFSET]} index={index + Game.FREECELL_OFFSET}  type='freecell'/>
-        {/each}
-      </div>
+  <div class='row headboard'>    
+    <div class='cells-board homecells'>
+      {#each Array(4) as _, index}
+        <GameCell cards={$columns[index + Game.HOMECELL_OFFSET]} index={index + Game.HOMECELL_OFFSET}  type='homecell' draggable={false}/>
+      {/each}
     </div>
-    <div class='row tableaus'>
-      {#each Array(8) as _, index}
-        <Tableau cards={$columns[index]} index={index} />
+    <div class='cells-board freecells'>
+      {#each Array(4) as _, index}
+        <GameCell cards={$columns[index + Game.FREECELL_OFFSET]} index={index + Game.FREECELL_OFFSET}  type='freecell'/>
       {/each}
     </div>
   </div>
-</main>
+  <div class='row tableaus'>
+    {#each Array(8) as _, index}
+      <Tableau cards={$columns[index]} index={index} />
+    {/each}
+  </div>
+</div>
 
 
 <style type="text/scss">
@@ -408,9 +406,11 @@
     flex-flow: row nowrap;
     margin: 1vh 0;
     padding:0;
-    width: 50%;
+    xwidth: 50%;
   }
 }
+
+
 .homecells {
   justify-content: flex-start;
 }

@@ -1,13 +1,17 @@
-<script type="text/javascript">
+<script>
+  export let disableUndo;
+
   function startGame() {
     console.log("Starting game clicked");
     alert('start game')
   };
 
   function undoMove() {
+    Game.undo();
     alert('Undo last move') 
   };
 
+  console.log("disableUndo", disableUndo)
   function getHint(){};
 
   function setGameSettings() {};
@@ -17,7 +21,7 @@
 <nav class="navbar fixed-bottom navbar-dark bg-dark p-0">
   <ul class="nav justify-content-around" style='width:100%'>
     <li class="nav-item">
-      <a class="nav-link text-white" href="#" on:click|preventDefault={undoMove}>
+      <a class="nav-link btn btn-link" href="#" class:disabled={disableUndo === 0} on:click|preventDefault={() => { Game.undo() }}>
         <i class="fas fa-undo"></i>
       </a>
     </li>
