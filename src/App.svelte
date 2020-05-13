@@ -5,8 +5,8 @@
   import GameCell from './gamecell.svelte';
   import Tableau from './tableau.svelte';
   import Footer from './footer.svelte';
-
-  import {columns, history, moves, settings} from './stores.js'; /* data store */
+  import {timeToString} from './time_to_string.js';
+  import {columns, history, moves, settings, timeElapsed} from './stores.js'; /* data store */
   
   const Game = {
     HOMECELL_OFFSET: 8,
@@ -346,13 +346,26 @@
   };
 
   function startGame(id) {
-    console.log("Start new game with id ", id);
     gameId = id || parseInt((Math.random() * 1000000), 10);
+    console.log("Start new game with id ", gameId);
     let deck = new Game.Deck(gameId);
     let cards = deck.toTableau();
     $history = [];
     $columns = cards.concat([[],[],[],[],[],[],[],[]]);
     $moves = 0;
+    if (timer) { resetTimer(); } 
+    timer = startTimer();
+  };
+
+  function startTimer() {
+    return setInterval(function() {
+      $timeElapsed += 1;
+    }, 1000);
+  };
+
+  function resetTimer() {
+    clearInterval(timer);
+    $timeElapsed = 0;
   };
 
   function getHint(){};
@@ -368,6 +381,7 @@
         break;
       case 'settings':
         console.log("change settings");
+        window.location.reload();
         break;
       case 'newgame':
         let gameId = event.detail.gameId;
@@ -385,12 +399,12 @@
 
   /* init settings for new game */
   let gameId;
-  let runTime = 0;
+  let timer;
 </script>
 
 <nav class="navbar navbar-dark bg-dark m-0 p-1 header">
   <div class='navsection text-left'>Game: {gameId || ' '}</div>
-  <div class='navsection text-center'>{runTime}</div>
+  <div class='navsection text-center'>{timeToString($timeElapsed)}</div>
   <div class='navsection text-right'>Moves: {$moves.length || 0}</div>
 </nav>
 
@@ -422,13 +436,16 @@
 }
 @media (min-width: 992px) { 
   .board { width: 70vh; height: 100vh;}
+  .header { font-size: 1.5em; }
+
+
 }
 @media (min-width: 1200px) {  
   .board { width: 70vh; height: 100vh;}
+  .header { font-size: 1.5em; }
 }
 
 .header {
-  font-size: 1.5em;
   width: 100%;
   height: 40px;
   justify-content: space-between;
