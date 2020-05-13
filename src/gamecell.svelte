@@ -10,7 +10,7 @@
 </script>
 
 <div class='cell {type}' data-index={index}>
-  <img src='/images/blank.png' class='blank'>
+  <img src='./images/blank.png' class='blank'>
   {#each cards as card, pos}
     <Card id={card} draggable={draggable}/>
   {/each}
