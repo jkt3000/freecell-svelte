@@ -112,6 +112,10 @@
         $columns[toIndex]   = this.addCard($columns[toIndex], card);
       });
       if (record) { this.recordMove(fromIndex, toIndex, cards); }
+      // check if move caused game to end (win)
+      if (Game.won()) {
+        alert(`You won!`);
+      }
     },
 
     alternateColors(c1, c2) { 
@@ -157,8 +161,8 @@
       for (let i=0; i < 8; i++) {
         if (i === index) continue;
         let parent = [...$columns[i]].slice(-1).pop();
-        console.log("findValidParent parent:", parent);
-        if (parent) {
+        console.log(`findValidParent in column ${i} for ${card}[${index}] parent:`, parent);
+        if (parent !== undefined) {
           if (Game.validParent(parent, card)) return i;
         }
       }
@@ -179,6 +183,13 @@
       if (!record) return;
       console.log("Undo last move", record);
       Game.moveCards(record.to, record.from, record.cards, false);
+    },
+
+    won() {
+      for (let i=this.HOMECELL_OFFSET; i < (this.HOMECELL_OFFSET + 4); i++) {
+        if ($columns[i].length !== 13) { return false; }        
+      }
+      return true;
     },
 
     Deck: class {
@@ -325,9 +336,16 @@
         }
       }
 
-      // find next viable spot
-      let toIndex = Game.findValidHomeCell(card) || Game.findValidParent(card) || Game.findEmptyFreeCell();
-      if (toIndex > 0) {
+      // find next viable spot - js is messed up 0 || undefined does not
+      // return what you expect.
+      let toIndex = Game.findValidHomeCell(card);
+      if (toIndex === undefined) {
+        toIndex = Game.findValidParent(card, index);
+      }
+      if (toIndex === undefined) {
+        toIndex = Game.findEmptyFreeCell();
+      }
+      if (toIndex >= 0) {
         Game.moveCards(index, toIndex, [card]);
       } else {
         console.log("No valid move found");
