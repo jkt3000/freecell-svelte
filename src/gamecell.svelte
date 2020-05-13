@@ -10,26 +10,31 @@
 </script>
 
 <div class='cell {type}' data-index={index}>
-  {#each cards as card, pos}
-    <Card id={card} draggable={draggable}/>
-  {/each}
+  {#if cards.length == 0}
+    <img src='/images/blank.png' class='blank'>
+  {:else}
+    {#each cards as card, pos}
+      <Card id={card} draggable={draggable}/>
+    {/each}
+  {/if}
 </div>
 
 
 <style type="text/scss">
 .cell {
   display: block; position:relative;
-  width: 11.5vw;
-  height: 16.1vw;
+  width: 24%;
+  height: auto;
   background: rgba(0,64,0);
   border: 1px solid #161; 
   margin: 1px;
-  span {
-    font-weight: bold;
-    font-size: 5vh; 
-    color: rgba(0,0,0,0.2);      
+  .blank {
+    margin:0; padding:0;
+    width: 100%;
+    height: auto;
   }
 }
+
 :global(.cell) {
   :global(.playing-card) {
     position:absolute !important;

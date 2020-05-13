@@ -388,18 +388,13 @@
   let runTime = 0;
 </script>
 
-
-<nav class="navbar navbar-dark bg-dark m-0 p-0 pl-1 pr-1 d-flex justify-content-between align-content-center">
-  <a class="navbar-brand" href="/"><span class='text-danger' style='font-size: 30px; line-height:1em; margin:0;padding:0;'>♥️</span></a>
-  {#if gameId !== undefined}
-    <span class='navbar-brand'>Game: {gameId}</span>
-  {/if}
+<nav class="navbar navbar-dark bg-dark m-0 p-0 pl-1 pr-1 d-flex justify-content-between align-content-center">  
+  <span class='navbar-brand'>{#if gameId !== undefined}Game: {gameId}{/if}</span>
   <span class='navbar-brand'>{runTime}</span>
   <span class='navbar-brand'>Moves: {$moves}</span>
 </nav>
 
-
-<div class='container-fluid' id='gameboard'>
+<div class='container board'>
   <div class='row headboard'>    
     <div class='cells-board homecells'>
       {#each Array(4) as _, index}
@@ -421,23 +416,53 @@
 
 <Footer disableUndo={($history.length === 0)} on:command={handleAction}/>
 
-
 <style type="text/scss">
+
+//.board { min-width: 400px; max-width: 70vh; height: 100%;}
+// @media (max-width: 576px) {
+//   .board { width: 70vh; height: 100vh;}
+//   .board { background: pink  !important; }
+// }
+
+// @media (min-width: 576px) {
+//   .board { width: 70vh; height: 100vh;}
+//   .board { background: blue  !important; }
+// }
+
+// // Medium devices (tablets, 768px and up)
+// @media (min-width: 768px) { 
+//   .board { width: 70vh; height: 100vh;}
+//   .board { background: yellow  !important; }
+// }
+
+@media (min-width: 400px) { 
+  .board {width: 400px; }
+}
+@media (min-width: 992px) { 
+  .board { width: 70vh; height: 100vh;}
+}
+@media (min-width: 1200px) {  
+  .board { width: 70vh; height: 100vh;}
+}
+
+.board {
+  height: 90%;
+  overflow:hidden;
+}
 .headboard {
+  padding: 1vh 0;
   display: flex;
   flex-flow: row nowrap;
-  justify-content: center;
-  padding: 0 5px;
-
+  justify-content: center;  
   .cells-board {
     display: flex;
     flex-flow: row nowrap;
     margin: 1vh 0;
     padding:0;
-    xwidth: 50%;
+    height: 100%;
+    width: 50%;
   }
 }
-
 
 .homecells {
   justify-content: flex-start;
@@ -446,8 +471,8 @@
   justify-content: flex-end;
 }
 .tableaus {
-  height: 100vh;
-  padding: 3vh 0;
+  height: 100%;
+  padding: 2% 0;
   display: flex;
   flex-flow: row nowrap;
   justify-content: center;  

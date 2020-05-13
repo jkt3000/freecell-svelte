@@ -48,9 +48,9 @@
   .tableau {
     background: rgba(0,0,0,0.2);
     padding: 0; margin:0;
-    width: 12vw;
-    height: 70vh;
-    margin: 0 1px;
+    width: 12.5%;
+    height: 100%;
+    margin: 0 0.2%;
     display: flex;
     align-items: center;
     flex-direction: column;
