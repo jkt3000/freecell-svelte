@@ -8,6 +8,9 @@ In the end, not sure this app is suited for, or needed Svelte, but thought it wa
 
 I think this game is 90% complete - end win screen is super lame though. 
 
+Try it here: https://redronin.github.io/
+
+
 * Should work on ipads, iphones and desktop
 * handles touch/drag on mobile
 * click card to auto-complete move if possible
