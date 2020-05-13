@@ -22,9 +22,7 @@ I think this game is 90% complete - end win screen is super lame though.
 * easy to send link of certain game # - like share button
 
 
-
-![Screenshot](/public/images/freecell_screenshot.png =300x)
-
+<img src="/public/images/freecell_screenshot.png" width="300"/>
 
 
 *Looking for a shareable component template? Go here --> [sveltejs/component-template](https://github.com/sveltejs/component-template)*
