@@ -114,7 +114,9 @@
       if (record) { this.recordMove(fromIndex, toIndex, cards); }
       // check if move caused game to end (win)
       if (Game.won()) {
-        alert(`You won!`);
+        setTimeout(() => {
+          alert(`You won!`);
+        }, 1000);
       }
     },
 
@@ -367,6 +369,18 @@
     }
   };
 
+  function testWin() {
+    $columns = [
+      ['Ks'],[],[],[],[],[],[],[],
+      ['As','2s','3s','4s','5s','6s','7s','8s','9s','Ts','Js','Qs'],
+      ['Ad','2d','3d','4d','5d','6d','7d','8d','9d','Td','Jd','Qd','Kd'],
+      ['Ac','2c','3c','4c','5c','6c','7c','8c','9c','Tc','Jc','Qc','Kc'],
+      ['Ah','2h','3h','4h','5h','6h','7h','8h','9h','Th','Jh','Qh','Kh'],
+      [],[],[],[]
+    ];
+
+  };
+
   function startGame(id) {
     gameId = id || parseInt((Math.random() * 1000000), 10);
     console.log("Start new game with id ", gameId);
@@ -438,7 +452,9 @@
 <nav class="navbar navbar-dark bg-dark m-0 p-1 header">
   <div class='navsection text-left'>
     <a href='/' class='text-danger'><i class='fas fa-diamond'></i></a>&nbsp;
-  Game: {gameId || ' '}</div>
+  Game: {gameId || ' '}
+    <!-- <a on:click={testWin}>Test</a> -->
+  </div>
   <div class='navsection text-center'>{timeToString($timeElapsed)}</div>
   <div class='navsection text-right'>Moves: {$moves}</div>
 </nav>
