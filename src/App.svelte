@@ -5,8 +5,9 @@
   import GameCell from './gamecell.svelte';
   import Tableau from './tableau.svelte';
   import Footer from './footer.svelte';
+  import NewGameModal from './NewGameModal.svelte';
   import {timeToString} from './time_to_string.js';
-  import {columns, history, moves, settings, timeElapsed} from './stores.js'; /* data store */
+  import {columns, history, moves, settings, timeElapsed, started} from './stores.js'; /* data store */
   
   const Game = {
     HOMECELL_OFFSET: 8,
@@ -355,6 +356,7 @@
     $moves = 0;
     if (timer) { resetTimer(); } 
     timer = startTimer();
+    $started = true;
   };
 
   function startTimer() {
@@ -375,6 +377,7 @@
   let gameId;
 
   function handleAction(event) {
+    console.log("[action]", event.detail);
     let command = event.detail.command;
     switch(command) {
       case 'undo':
@@ -384,8 +387,12 @@
         console.log("change settings");
         break;
       case 'newgame':
-        let id = event.detail.gameId;
-        startGame(id);
+        if ($started) {
+          $started = false;
+        } else {
+          let id = event.detail.gameId;
+          startGame(id);          
+        }
         break;
       case 'restart':
         console.log("Restart same game");
@@ -431,6 +438,8 @@
 </div>
 
 <Footer disableUndo={($history.length === 0)} on:command={handleAction}/>
+
+<NewGameModal display={!$started} on:command={handleAction}/>
 
 <style type="text/scss">
 @media (min-width: 400px) { 
@@ -489,4 +498,5 @@
   flex-flow: row nowrap;
   justify-content: center;  
 }
+
 </style>
