@@ -10,13 +10,10 @@
 </script>
 
 <div class='cell {type}' data-index={index}>
-  {#if cards.length == 0}
-    <img src='/images/blank.png' class='blank'>
-  {:else}
-    {#each cards as card, pos}
-      <Card id={card} draggable={draggable}/>
-    {/each}
-  {/if}
+  <img src='/images/blank.png' class='blank'>
+  {#each cards as card, pos}
+    <Card id={card} draggable={draggable}/>
+  {/each}
 </div>
 
 

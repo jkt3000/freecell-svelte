@@ -157,7 +157,10 @@
       for (let i=0; i < 8; i++) {
         if (i === index) continue;
         let parent = [...$columns[i]].slice(-1).pop();
-        if (Game.validParent(parent, card)) return i;
+        console.log("findValidParent parent:", parent);
+        if (parent) {
+          if (Game.validParent(parent, card)) return i;
+        }
       }
     },
 
