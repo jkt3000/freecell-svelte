@@ -460,14 +460,14 @@
   overflow:hidden;
 }
 .headboard {
-  padding: 1vh 0;
+  padding: 0.2vh 0;
   display: flex;
   flex-flow: row nowrap;
   justify-content: center;  
   .cells-board {
     display: flex;
     flex-flow: row nowrap;
-    margin: 1vh 0;
+    margin: .2vh 0;
     padding:0;
     height: 100%;
     width: 50%;
@@ -482,7 +482,7 @@
 }
 .tableaus {
   height: 100%;
-  padding: 2% 0;
+  padding: 0.5vh 0;
   display: flex;
   flex-flow: row nowrap;
   justify-content: center;  
