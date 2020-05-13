@@ -375,7 +375,7 @@
   function setGameSettings() {};
 
   let gameId;
-
+  $: showModal = true;
   function handleAction(event) {
     console.log("[action]", event.detail);
     let command = event.detail.command;
@@ -387,19 +387,24 @@
         console.log("change settings");
         break;
       case 'newgame':
-        if ($started) {
-          $started = false;
-        } else {
-          let id = event.detail.gameId;
-          startGame(id);          
-        }
+        showModal = true;
+        break;
+      case 'startgame':
+        let id = event.detail.gameId;
+        startGame(id);          
+        showModal = false;
         break;
       case 'restart':
         console.log("Restart same game");
-        startGame(gameId);
-        break;
+        if (confirm("Are you sure you wish to restart this game?")) {
+          startGame(gameId);
+          break;          
+        }
       case 'hint':
         console.log("Hint for next move");
+        break;
+      case 'cancelmodal':
+        showModal = false;
         break;
       default:
     }
@@ -439,7 +444,7 @@
 
 <Footer disableUndo={($history.length === 0)} on:command={handleAction}/>
 
-<NewGameModal display={!$started} on:command={handleAction}/>
+<NewGameModal display={showModal} on:command={handleAction}/>
 
 <style type="text/scss">
 @media (min-width: 400px) { 
@@ -461,6 +466,7 @@
   height: 40px;
   justify-content: space-between;
   .navsection {
+    padding: 0 5px;
     width: 30%;
     flex-grow: 1;
   }

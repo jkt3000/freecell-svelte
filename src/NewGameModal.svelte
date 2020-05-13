@@ -2,20 +2,24 @@
 
 <script>
   import { createEventDispatcher } from 'svelte';
+  import {started} from "./stores.js";
   export let display = true;
 
   let gameId;
 
-  console.log("display modal ", display)
   const dispatch = createEventDispatcher();
-  function newGame() {
-    dispatch('command', {command: 'newgame', gameId: gameId});
+  function startGame() {
+    dispatch('command', {command: 'startgame', gameId: gameId});
+  };
+  function cancel() {
+    dispatch('command', {command: 'cancelmodal', gameId: gameId});
   };
 </script>
 
 <div class='modal bg-dark {display ? "d-block" : ""}' id='new-game-modal'>
   <div class='modal-dialog' style='top: 30%'>
     <div class='modal-content alert alert-success'>
+      <a class='text-right' on:click={cancel} href='#'>X</a>
       <div class='modal-header justify-content-center'>
         <div>
           <h3>FreeCell</h3>
@@ -32,7 +36,7 @@
           <input type='number' bind:value={gameId} class='form-control' placeholder="Game # (optional)">
         </div>
         <div class='input-group justify-content-center mt-3'>
-          <button class='btn btn-success btn-lg' on:click={newGame}>Start New Game</button>
+          <button class='btn btn-success btn-lg' on:click={startGame}>Start New Game</button>          
         </div>
       </div>
     </div>
