@@ -24,7 +24,7 @@
 </script>
       
 
-<nav class="navbar fixed-bottom navbar-dark bg-dark p-0">
+<nav class="navbar fixed-bottom navbar-dark bg-dark p-0" id='footer'>
   <ul class="nav justify-content-around" style='width:100%'>
     <li class="nav-item">
       <a class="nav-link btn btn-link text-white" href="#" class:disabled={disableUndo} on:click|preventDefault={undo}>
@@ -48,3 +48,9 @@
     </li>
   </ul>
 </nav>
+
+<style type="text/scss">
+  #footer {
+    bottom:  20px !important;
+  }
+</style>

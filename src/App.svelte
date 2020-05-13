@@ -405,7 +405,7 @@
 <nav class="navbar navbar-dark bg-dark m-0 p-1 header">
   <div class='navsection text-left'>Game: {gameId || ' '}</div>
   <div class='navsection text-center'>{timeToString($timeElapsed)}</div>
-  <div class='navsection text-right'>Moves: {$moves.length || 0}</div>
+  <div class='navsection text-right'>Moves: {$moves}</div>
 </nav>
 
 <div class='container board'>
