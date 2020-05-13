@@ -484,11 +484,10 @@
 <NewGameModal display={showModal} on:command={handleAction}/>
 
 <style type="text/scss">
-@media (min-width: 400px) { 
-  .board {width: 400px; }
+@media (max-width: 300px) { 
+  .board {width: 300px; }
 }
 @media (min-width: 992px) { 
-  .board { width: 70vh; height: 100vh;}
   .header { font-size: 1.5em; }
 
 
@@ -504,7 +503,7 @@
   justify-content: space-between;
   .navsection {
     padding: 0 5px;
-    width: 30%;
+    width: 33%;
     flex-grow: 1;
   }
 }

@@ -1,3 +1,11 @@
+# Svelte FreeCell
+
+Freecell implemented in javascript using Svelte and interact.js.
+
+![Screenshot](/public/images/freecell_screenshot.png?raw=true)
+
+
+
 *Looking for a shareable component template? Go here --> [sveltejs/component-template](https://github.com/sveltejs/component-template)*
 
 ---
