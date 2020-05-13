@@ -20,6 +20,9 @@
   function settings() {
     dispatch('command', {command: 'settings'});
   };
+  function restart() {
+    dispatch('command', {command: 'restart'});
+  };
 
 </script>
       
@@ -28,17 +31,22 @@
   <ul class="nav justify-content-around" style='width:100%'>
     <li class="nav-item">
       <a class="nav-link btn btn-link text-white" href="#" class:disabled={disableUndo} on:click|preventDefault={undo}>
-        <i class="fas fa-undo"></i>
+        <i class="fas fa-backward"></i>
       </a>
     </li>
     <li class="nav-item">
       <a class="nav-link btn btn-link text-white" href="#" on:click|preventDefault={newGame}>
-        <i class="fas fa-plus"></i>
+        <i class="fas fa-power-off"></i>
       </a>
     </li>
     <li class="nav-item">
       <a class="nav-link btn btn-link text-white" href="#" on:click|preventDefault={hint}>
         <i class="far fa-lightbulb"></i>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link btn btn-link text-white" href="#" on:click|preventDefault={restart}>
+        <i class="far fa-undo"></i>
       </a>
     </li>
     <li class="nav-item">

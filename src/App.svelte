@@ -372,6 +372,7 @@
 
   function setGameSettings() {};
 
+  let gameId;
 
   function handleAction(event) {
     let command = event.detail.command;
@@ -381,14 +382,14 @@
         break;
       case 'settings':
         console.log("change settings");
-        window.location.reload();
         break;
       case 'newgame':
-        let gameId = event.detail.gameId;
-        startGame(gameId);
+        let id = event.detail.gameId;
+        startGame(id);
         break;
       case 'restart':
         console.log("Restart same game");
+        startGame(gameId);
         break;
       case 'hint':
         console.log("Hint for next move");
@@ -398,12 +399,13 @@
   };
 
   /* init settings for new game */
-  let gameId;
   let timer;
 </script>
 
 <nav class="navbar navbar-dark bg-dark m-0 p-1 header">
-  <div class='navsection text-left'>Game: {gameId || ' '}</div>
+  <div class='navsection text-left'>
+    <a href='/' class='text-danger'><i class='fas fa-diamond'></i></a>&nbsp;
+  Game: {gameId || ' '}</div>
   <div class='navsection text-center'>{timeToString($timeElapsed)}</div>
   <div class='navsection text-right'>Moves: {$moves}</div>
 </nav>
