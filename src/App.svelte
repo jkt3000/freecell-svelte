@@ -388,10 +388,10 @@
   let runTime = 0;
 </script>
 
-<nav class="navbar navbar-dark bg-dark m-0 p-0 pl-1 pr-1 d-flex justify-content-between align-content-center">  
-  <span class='navbar-brand'>{#if gameId !== undefined}Game: {gameId}{/if}</span>
-  <span class='navbar-brand'>{runTime}</span>
-  <span class='navbar-brand'>Moves: {$moves}</span>
+<nav class="navbar navbar-dark bg-dark m-0 p-1 header">
+  <div class='navsection text-left'>Game: {gameId || ' '}</div>
+  <div class='navsection text-center'>{runTime}</div>
+  <div class='navsection text-right'>Moves: {$moves.length || 0}</div>
 </nav>
 
 <div class='container board'>
@@ -417,24 +417,6 @@
 <Footer disableUndo={($history.length === 0)} on:command={handleAction}/>
 
 <style type="text/scss">
-
-//.board { min-width: 400px; max-width: 70vh; height: 100%;}
-// @media (max-width: 576px) {
-//   .board { width: 70vh; height: 100vh;}
-//   .board { background: pink  !important; }
-// }
-
-// @media (min-width: 576px) {
-//   .board { width: 70vh; height: 100vh;}
-//   .board { background: blue  !important; }
-// }
-
-// // Medium devices (tablets, 768px and up)
-// @media (min-width: 768px) { 
-//   .board { width: 70vh; height: 100vh;}
-//   .board { background: yellow  !important; }
-// }
-
 @media (min-width: 400px) { 
   .board {width: 400px; }
 }
@@ -443,6 +425,17 @@
 }
 @media (min-width: 1200px) {  
   .board { width: 70vh; height: 100vh;}
+}
+
+.header {
+  font-size: 1.5em;
+  width: 100%;
+  height: 40px;
+  justify-content: space-between;
+  .navsection {
+    width: 30%;
+    flex-grow: 1;
+  }
 }
 
 .board {
