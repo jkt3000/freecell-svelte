@@ -2,7 +2,28 @@
 
 Freecell implemented in javascript using Svelte and interact.js.
 
-![Screenshot](/public/images/freecell_screenshot.png?raw=true)
+I spend a few days playing a Freecell app, and decided I wanted to try writing my own Freecell. I thought it would be a great opportunity to learn Svelte too.
+
+In the end, not sure this app is suited for, or needed Svelte, but thought it was a fun experiment to make it work with it. Still barely touched what Svelte is and what it can do, but it was fun learning.
+
+I think this game is 90% complete - end win screen is super lame though. 
+
+* Should work on ipads, iphones and desktop
+* handles touch/drag on mobile
+* click card to auto-complete move if possible
+* enter in game # from MS Freecell and will bring up same game - uses same randomizer/seeding algorithm
+
+#### Todo
+
+* Has a very lame win screen - make it better. Like win animations in original game
+* No sounds yet
+* Make it better (currently not great coding - but I was just learning what Svelte is.)
+* support http://url?id=xxxx to fire up certain game # of Freecell
+* easy to send link of certain game # - like share button
+
+
+
+![Screenshot](/public/images/freecell_screenshot.png | width=300)
 
 
 
