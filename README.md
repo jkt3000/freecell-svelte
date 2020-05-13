@@ -23,7 +23,7 @@ I think this game is 90% complete - end win screen is super lame though.
 
 
 
-![Screenshot](/public/images/freecell_screenshot.png | width=300)
+![Screenshot](/public/images/freecell_screenshot.png =300x)
 
 
 
