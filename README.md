@@ -2,13 +2,16 @@
 
 Freecell implemented in javascript using Svelte and interact.js.
 
+
+### Try it here: https://redronin.github.io/freecell-svelte.github.io/
+
+*(First page load is slow as it loads images of playing cards)*
+
 I spend a few days playing a Freecell app, and decided I wanted to try writing my own Freecell. I thought it would be a great opportunity to learn Svelte too.
 
 In the end, not sure this app is suited for, or needed Svelte, but thought it was a fun experiment to make it work with it. Still barely touched what Svelte is and what it can do, but it was fun learning.
 
 I think this game is 90% complete - end win screen is super lame though. 
-
-Try it here: https://redronin.github.io/freecell-svelte.github.io/index.html
 
 
 * Should work on ipads, iphones and desktop
