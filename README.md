@@ -67,11 +67,17 @@ cd svelte-app
     yarn add interactjs
     yarn add moment
 
-Add .babelrc
-
 Add scripts in package.json
+
+
+*** to publish pages to github pages, need to make output dir ./ so that files served are relative, to work with relative paths. ***
 
 
 
 ### Running locally
 
+yarn dev
+
+### To build for publishing to github pages
+
+yarn clean; yarn build
