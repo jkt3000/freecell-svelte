@@ -3,9 +3,11 @@
   "main": "main.js",
   "scripts": {
     "clean": "rm -rf ./dist/* && rm -rf ./.cache/*",
-    "dev": "parcel serve -p 5000 src/index.html --public-url ./",
+    "dev": "parcel serve -p 5000 src/index.html",
     "build": "parcel build src/index.html  --public-url ./",
-    "postbuild": "cp -r public/* dist/"
+    "postbuild": "cp -r public/* dist/",
+    "copygithub": "rm -rf ../freecell-svelte.github.io/* && cp -r ./dist/* ../freecell-svelte.github.io/",
+    "publish": "yarn clean && yarn build && yarn copygithub"
   },
   "devDependencies": {
     "@babel/core": "^7.9.6",
