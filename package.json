@@ -2,9 +2,9 @@
   "name": "svelte-freecell",
   "main": "main.js",
   "scripts": {
-    "dev": "parcel serve -p 5000 src/index.html --out-dir public",
-    "build": "parcel build src/index.html --out-dir public --public-url public"
-
+    "dev": "parcel serve -p 5000",
+    "build": "parcel build src/index.html",
+    "postbuild": "cp -r public/* dist/"
   },
   "devDependencies": {
     "@babel/core": "^7.9.6",
