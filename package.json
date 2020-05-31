@@ -2,8 +2,9 @@
   "name": "svelte-freecell",
   "main": "main.js",
   "scripts": {
-    "dev": "parcel serve -p 5000 src/index.html",
-    "build": "parcel build src/index.html",
+    "clean": "rm -rf ./dist/* && rm -rf ./.cache/*",
+    "dev": "parcel serve -p 5000 src/index.html --public-url ./",
+    "build": "parcel build src/index.html  --public-url ./",
     "postbuild": "cp -r public/* dist/"
   },
   "devDependencies": {
