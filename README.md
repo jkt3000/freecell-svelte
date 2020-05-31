@@ -51,76 +51,33 @@ cd svelte-app
 
 ## Get started
 
-Install the dependencies...
 
-```bash
-cd svelte-app
-npm install
-```
+### Installing
 
-...then start [Rollup](https://rollupjs.org):
+    yarn add parcel-bundler --dev
 
-```bash
-npm run dev
-```
+    yarn add --dev svelte
+    yarn add --dev parcel-plugin-svelte
+    yarn add --dev parcel-bundler
+    yarn add --dev sass
+    yarn add node-sass
+    yarn add --dev @babel/core @babel/preset-env @babel/plugin-proposal-class-properties
+    yarn add core-js
+    yarn add svelte-preprocess
+    yarn add interactjs
+    yarn add moment
 
-Navigate to [localhost:5000](http://localhost:5000). You should see your app running. Edit a component file in `src`, save it, and reload the page to see your changes.
-
-By default, the server will only respond to requests from localhost. To allow connections from other computers, edit the `sirv` commands in package.json to include the option `--host 0.0.0.0`.
-
-
-## Building and running in production mode
-
-To create an optimised version of the app:
-
-```bash
-npm run build
-```
-
-You can run the newly built app with `npm run start`. This uses [sirv](https://github.com/lukeed/sirv), which is included in your package.json's `dependencies` so that the app will work when you deploy to platforms like [Heroku](https://heroku.com).
+Add scripts in package.json
 
 
-## Single-page app mode
-
-By default, sirv will only respond to requests that match files in `public`. This is to maximise compatibility with static fileservers, allowing you to deploy your app anywhere.
-
-If you're building a single-page app (SPA) with multiple routes, sirv needs to be able to respond to requests for *any* path. You can make it so by editing the `"start"` command in package.json:
-
-```js
-"start": "sirv public --single"
-```
+*** to publish pages to github pages, need to make output dir ./ so that files served are relative, to work with relative paths. ***
 
 
-## Deploying to the web
 
-### With [now](https://zeit.co/now)
+### Running locally
 
-Install `now` if you haven't already:
+yarn dev
 
-```bash
-npm install -g now
-```
+### To build for publishing to github pages
 
-Then, from within your project folder:
-
-```bash
-cd public
-now deploy --name my-project
-```
-
-As an alternative, use the [Now desktop client](https://zeit.co/download) and simply drag the unzipped project folder to the taskbar icon.
-
-### With [surge](https://surge.sh/)
-
-Install `surge` if you haven't already:
-
-```bash
-npm install -g surge
-```
-
-Then, from within your project folder:
-
-```bash
-npm run build
-surge public my-project.surge.sh
-```
+yarn clean; yarn build

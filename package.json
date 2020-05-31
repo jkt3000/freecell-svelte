@@ -1,25 +1,28 @@
 {
-  "name": "svelte-app",
-  "version": "1.0.0",
+  "name": "svelte-freecell",
+  "main": "main.js",
   "scripts": {
-    "build": "rollup -c",
-    "dev": "rollup -c -w",
-    "start": "sirv public"
+    "clean": "rm -rf ./dist/* && rm -rf ./.cache/*",
+    "dev": "parcel serve -p 5000 src/index.html",
+    "build": "parcel build src/index.html  --public-url ./",
+    "postbuild": "cp -r public/* dist/",
+    "copygithub": "rm -rf ../freecell-svelte.github.io/* && cp -r ./dist/* ../freecell-svelte.github.io/",
+    "publish": "yarn clean && yarn build && yarn copygithub"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "11.0.2",
-    "@rollup/plugin-node-resolve": "^7.0.0",
-    "interactjs": "^1.9.13",
-    "rollup": "^1.20.0",
-    "rollup-plugin-livereload": "^1.0.0",
-    "rollup-plugin-svelte": "^5.0.3",
-    "rollup-plugin-terser": "^5.1.2",
-    "svelte": "^3.0.0"
+    "@babel/core": "^7.9.6",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/preset-env": "^7.9.6",
+    "parcel-bundler": "^1.12.4",
+    "parcel-plugin-svelte": "^4.0.6",
+    "sass": "^1.26.5",
+    "svelte": "^3.22.3"
   },
   "dependencies": {
-    "sass": "^1.26.5",
-    "sirv-cli": "^0.4.4",
-    "svelte-preprocess": "^3.7.4",
-    "sveltestrap": "^3.3.3"
+    "core-js": "3",
+    "interactjs": "^1.9.17",
+    "moment": "^2.25.3",
+    "node-sass": "^4.14.1",
+    "svelte-preprocess": "^3.7.4"
   }
 }

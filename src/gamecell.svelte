@@ -10,19 +10,19 @@
 </script>
 
 <div class='cell {type}' data-index={index}>
-  <img src='./images/blank.png' class='blank'>
+  <img src='/images/blank.png' class='blank'>
   {#each cards as card, pos}
     <Card id={card} draggable={draggable}/>
   {/each}
 </div>
 
 
-<style type="text/scss">
+<style lang='scss'>
 .cell {
   display: block; position:relative;
   width: 24%;
   height: auto;
-  background: rgba(0,64,0);
+  background: rgba(0,64,0, 1);
   border: 1px solid #161; 
   margin: 1px;
   .blank {
