@@ -3,7 +3,7 @@
 Freecell implemented in javascript using Svelte and interact.js.
 
 
-### Try it here: https://redronin.github.io/freecell-svelte.github.io/
+### Try it here: https://redronin.github.io/freecell-svelte/
 
 *(First page load is slow as it loads images of playing cards)*
 

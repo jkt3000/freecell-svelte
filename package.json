@@ -2,12 +2,11 @@
   "name": "svelte-freecell",
   "main": "main.js",
   "scripts": {
-    "clean": "rm -rf ./dist/* && rm -rf ./.cache/*",
+    "clean": "rm -rf ./dist/* && rm -rf ./.cache/* && rm -rf ./docs/*",
     "dev": "parcel serve -p 5000 src/index.html",
-    "build": "parcel build src/index.html  --public-url ./",
-    "postbuild": "cp -r public/* dist/",
-    "copygithub": "rm -rf ../freecell-svelte.github.io/* && cp -r ./dist/* ../freecell-svelte.github.io/",
-    "publish": "yarn clean && yarn build && yarn copygithub"
+    "build": "parcel build src/index.html  --public-url ./ -output-dir ./docs/",
+    "postbuild": "cp -r public/* docs/",
+    "publish": "yarn clean && yarn build"
   },
   "devDependencies": {
     "@babel/core": "^7.9.6",
