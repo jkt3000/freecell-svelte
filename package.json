@@ -4,7 +4,7 @@
   "scripts": {
     "clean": "rm -rf ./dist/* && rm -rf ./.cache/* && rm -rf ./docs/*",
     "dev": "parcel serve -p 5000 src/index.html",
-    "build": "parcel build src/index.html  --public-url ./ -output-dir ./docs/",
+    "build": "parcel build src/index.html  --public-url ./ --out-dir docs/",
     "postbuild": "cp -r public/* docs/",
     "publish": "yarn clean && yarn build"
   },
@@ -23,5 +23,6 @@
     "moment": "^2.25.3",
     "node-sass": "^4.14.1",
     "svelte-preprocess": "^3.7.4"
-  }
+  },
+  "version": "0.0.0"
 }
