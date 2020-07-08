@@ -1,6 +1,8 @@
 # Svelte FreeCell
 
-Freecell implemented in javascript using Svelte and interact.js.
+Freecell implemented in javascript using Svelte and interact.js. Works on ipad, browser and iphone (although cards are a little small)
+
+<img src="/public/images/freecell_screenshot.png" width="300"/>
 
 
 ### Try it here: https://redronin.github.io/freecell-svelte/
@@ -27,8 +29,6 @@ I think this game is 90% complete - end win screen is super lame though.
 * support http://url?id=xxxx to fire up certain game # of Freecell
 * easy to send link of certain game # - like share button
 
-
-<img src="/public/images/freecell_screenshot.png" width="300"/>
 
 
 *Looking for a shareable component template? Go here --> [sveltejs/component-template](https://github.com/sveltejs/component-template)*
