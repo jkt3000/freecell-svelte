@@ -15,7 +15,7 @@
     "parcel-bundler": "^1.12.4",
     "parcel-plugin-svelte": "^4.0.6",
     "sass": "^1.26.5",
-    "svelte": "^3.22.3"
+    "svelte": "^3.49.0"
   },
   "dependencies": {
     "core-js": "3",
